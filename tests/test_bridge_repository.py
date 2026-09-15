@@ -365,3 +365,61 @@ async def test_curated_and_live_index_take_precedence_over_coingecko():
     assert bridges is not None
     assert all(not b.auto_detected for b in bridges)
     assert coingecko.call_count == 0
+
+
+async def test_explain_miss_reports_no_live_sync_yet():
+    repo = BridgeRepository(cache=DummyCache())  # get_token_index() -> None
+
+    reason = await repo.explain_miss("SOMENEWTOKEN")
+
+    assert "ещё ни разу не синхронизировался" in reason
+
+
+async def test_explain_miss_reports_below_threshold_networks():
+    class IndexCache(DummyCache):
+        async def get_token_index(self):
+            return {"SOMENEWTOKEN": ["Ethereum"]}
+
+    repo = BridgeRepository(cache=IndexCache())
+
+    reason = await repo.explain_miss("somenewtoken")
+
+    assert "1 сети" in reason
+    assert "Ethereum" in reason
+
+
+async def test_explain_miss_reports_coingecko_not_configured():
+    class IndexCache(DummyCache):
+        async def get_token_index(self):
+            return {}
+
+    repo = BridgeRepository(cache=IndexCache())  # coingecko defaults to None
+
+    reason = await repo.explain_miss("SOMENEWTOKEN")
+
+    assert "отсутствует" in reason
+    assert "не настроен" in reason
+
+
+async def test_explain_miss_reports_coingecko_error_after_failed_lookup():
+    class FailingCoinGecko:
+        async def find_networks(self, ticker: str) -> list[str]:
+            raise RuntimeError("429 rate limited")
+
+    cache = RecordingCoingeckoCache()
+    repo = BridgeRepository(cache=cache, coingecko=FailingCoinGecko())
+
+    await repo.find_bridges_for_ticker("SOMENEWTOKEN")
+    reason = await repo.explain_miss("SOMENEWTOKEN")
+
+    assert "429 rate limited" in reason
+
+
+async def test_explain_miss_reports_coingecko_confirmed_empty():
+    cache = RecordingCoingeckoCache()
+    repo = BridgeRepository(cache=cache, coingecko=FakeCoinGecko([]))
+
+    await repo.find_bridges_for_ticker("SOMENEWTOKEN")
+    reason = await repo.explain_miss("SOMENEWTOKEN")
+
+    assert "подходящих сетей не нашёл" in reason

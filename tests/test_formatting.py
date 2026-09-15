@@ -78,3 +78,15 @@ def test_format_not_found_without_suggestions():
 
     assert "ZZZZ" in text
     assert "Возможно" not in text
+
+
+def test_format_not_found_includes_miss_reason_when_provided():
+    text = format_not_found_message("ZZZZ", [], miss_reason="в живом индексе Li.Fi отсутствует")
+
+    assert "в живом индексе Li.Fi отсутствует" in text
+
+
+def test_format_not_found_omits_miss_reason_when_absent():
+    text = format_not_found_message("ZZZZ", [])
+
+    assert "🔍" not in text

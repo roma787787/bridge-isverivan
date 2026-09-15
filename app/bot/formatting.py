@@ -24,13 +24,15 @@ def format_bridges_message(ticker: str, bridges: list[BridgeInfo]) -> str:
     return "\n".join(lines).rstrip()
 
 
-def format_not_found_message(ticker: str, suggestions: list[str]) -> str:
+def format_not_found_message(ticker: str, suggestions: list[str], miss_reason: str | None = None) -> str:
     text = f"\U0001f615 Пока не нашёл мостов, поддерживающих <b>{escape(ticker)}</b>."
     if suggestions:
         options = ", ".join(f"<code>{escape(s)}</code>" for s in suggestions)
         text += f"\n\nВозможно, вы имели в виду: {options}?"
     else:
         text += "\n\nПроверьте правильность тикера или попробуйте другой (например, USDT, ETH, SOL)."
+    if miss_reason:
+        text += f"\n\n\U0001f50d <i>{escape(miss_reason)}</i>"
     return text
 
 

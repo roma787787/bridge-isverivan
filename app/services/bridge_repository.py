@@ -217,6 +217,48 @@ class BridgeRepository:
             for aggregator in _GENERAL_AGGREGATORS
         ]
 
+    async def explain_miss(self, ticker: str) -> str:
+        """Best-effort human-readable reason a ticker resolved to nothing.
+
+        Meant for admin diagnostics (shown alongside the "not found" reply)
+        so tracking down *why* a specific ticker didn't resolve doesn't
+        require a separate /debug round-trip. Reads the same cache state
+        ``find_bridges_for_ticker`` just wrote, so it reflects what actually
+        happened during this exact request rather than re-querying live.
+        """
+        ticker = ticker.upper()
+        parts: list[str] = []
+
+        index = await self._cache.get_token_index()
+        if index is None:
+            parts.append("живой индекс Li.Fi ещё ни разу не синхронизировался")
+        else:
+            live_networks = index.get(ticker) or _MANUAL_NETWORK_FALLBACKS.get(ticker, [])
+            if live_networks:
+                parts.append(
+                    f"в Li.Fi найден только на {len(live_networks)} сети(ях) "
+                    f"({', '.join(live_networks)}), нужно минимум 2"
+                )
+            else:
+                parts.append("в живом индексе Li.Fi отсутствует")
+
+        if self._coingecko is None:
+            parts.append("CoinGecko fallback не настроен")
+        else:
+            error = await self._cache.get_coingecko_error(ticker)
+            cached = await self._cache.get_coingecko_networks(ticker)
+            if cached is None:
+                if error:
+                    parts.append(f"CoinGecko: запрос завершился ошибкой «{error}», повторится при следующем поиске")
+                else:
+                    parts.append("CoinGecko ещё не проверялся")
+            elif cached:
+                parts.append(f"CoinGecko нашёл только {len(cached)} сеть(и) ({', '.join(cached)}), нужно минимум 2")
+            else:
+                parts.append("CoinGecko проверил — подходящих сетей не нашёл")
+
+        return "; ".join(parts)
+
     async def suggest_tickers(self, raw: str, limit: int = 3) -> list[str]:
         known = set(self.all_known_tickers())
         index = await self._cache.get_token_index()
