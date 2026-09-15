@@ -45,8 +45,8 @@ def test_format_bridges_message_flags_auto_detected():
 
     text = format_bridges_message("LSK", bridges)
 
-    assert "агрегаторы" in text.lower()
-    assert "курируемом списке" in text
+    assert "маршрут" in text.lower()
+    assert "Доступные мосты" in text
 
 
 def test_format_bridges_message_no_disclaimer_for_curated_results():
@@ -61,7 +61,7 @@ def test_format_bridges_message_no_disclaimer_for_curated_results():
 
     text = format_bridges_message("USDT", bridges)
 
-    assert "курируемом списке" not in text
+    assert "проверяйте маршрут" not in text.lower()
     assert "Доступные мосты" in text
 
 

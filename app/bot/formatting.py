@@ -7,8 +7,7 @@ from ..services.bridge_repository import BridgeInfo
 
 def format_bridges_message(ticker: str, bridges: list[BridgeInfo]) -> str:
     is_auto_detected = any(bridge.auto_detected for bridge in bridges)
-    header = "Кросс-чейн агрегаторы" if is_auto_detected else "Доступные мосты"
-    lines = [f"\U0001f309 <b>{header} для {escape(ticker)}:</b>", ""]
+    lines = [f"\U0001f309 <b>Доступные мосты для {escape(ticker)}:</b>", ""]
     for index, bridge in enumerate(bridges, start=1):
         networks = ", ".join(escape(network) for network in bridge.networks)
         lines.append(f"{index}. <b>{escape(bridge.display_name)}</b>")
@@ -18,10 +17,8 @@ def format_bridges_message(ticker: str, bridges: list[BridgeInfo]) -> str:
 
     if is_auto_detected:
         lines.append(
-            "⚠️ Этого токена нет в нашем курируемом списке, но мы нашли его в перечисленных сетях. "
-            "Показанные сервисы — универсальные кросс-чейн агрегаторы, которые могут проложить маршрут "
-            "для токена; наличие конкретного пула ликвидности не гарантировано — проверяйте маршрут и "
-            "сумму на сайте перед переводом."
+            "⚠️ Наличие конкретного пула ликвидности не гарантировано — проверяйте маршрут и сумму "
+            "на сайте перед переводом."
         )
 
     return "\n".join(lines).rstrip()
