@@ -1,0 +1,66 @@
+{
+  "bridges": {
+    "stargate": {
+      "display_name": "Stargate Finance",
+      "url": "https://stargate.finance",
+      "networks": ["Ethereum", "Arbitrum", "Optimism", "Polygon", "BNB Chain", "Avalanche", "Base", "Linea"]
+    },
+    "orbiter": {
+      "display_name": "Orbiter Finance",
+      "url": "https://orbiter.finance",
+      "networks": ["Ethereum", "zkSync Era", "Starknet", "Arbitrum", "Linea", "Base", "Optimism", "Polygon"]
+    },
+    "hop": {
+      "display_name": "Hop Protocol",
+      "url": "https://hop.exchange",
+      "networks": ["Ethereum", "Arbitrum", "Optimism", "Polygon", "Base", "Gnosis"]
+    },
+    "cbridge": {
+      "display_name": "Celer cBridge",
+      "url": "https://cbridge.celer.network",
+      "networks": ["Ethereum", "BNB Chain", "Polygon", "Arbitrum", "Optimism", "Avalanche", "Fantom"]
+    },
+    "synapse": {
+      "display_name": "Synapse Protocol",
+      "url": "https://synapseprotocol.com",
+      "networks": ["Ethereum", "Arbitrum", "Optimism", "Avalanche", "BNB Chain", "Polygon", "Base"]
+    },
+    "across": {
+      "display_name": "Across Protocol",
+      "url": "https://across.to",
+      "networks": ["Ethereum", "Arbitrum", "Optimism", "Polygon", "Base", "zkSync Era", "Linea"]
+    },
+    "wormhole": {
+      "display_name": "Wormhole (Portal Bridge)",
+      "url": "https://portalbridge.com",
+      "networks": ["Ethereum", "Solana", "BNB Chain", "Polygon", "Avalanche", "Arbitrum", "Optimism", "Base"]
+    },
+    "allbridge": {
+      "display_name": "Allbridge",
+      "url": "https://allbridge.io",
+      "networks": ["Ethereum", "BNB Chain", "Solana", "Polygon", "Avalanche", "Arbitrum"]
+    },
+    "squid": {
+      "display_name": "Squid Router",
+      "url": "https://app.squidrouter.com",
+      "networks": ["Ethereum", "Arbitrum", "Optimism", "Polygon", "Avalanche", "BNB Chain", "Base"]
+    },
+    "meson": {
+      "display_name": "Meson.fi",
+      "url": "https://meson.fi",
+      "networks": ["Ethereum", "Arbitrum", "Optimism", "Polygon", "BNB Chain", "zkSync Era"]
+    }
+  },
+  "tokens": {
+    "USDT": { "bridges": ["stargate", "orbiter", "cbridge", "synapse", "wormhole", "allbridge", "squid", "meson"] },
+    "USDC": { "bridges": ["stargate", "hop", "across", "cbridge", "synapse", "wormhole", "allbridge", "squid"] },
+    "ETH": { "bridges": ["hop", "across", "synapse", "orbiter", "cbridge", "stargate", "squid", "meson"] },
+    "WBTC": { "bridges": ["across", "synapse", "cbridge", "wormhole", "allbridge"] },
+    "SOL": { "bridges": ["wormhole", "allbridge"] },
+    "MATIC": { "bridges": ["cbridge", "synapse", "squid", "meson"] },
+    "BNB": { "bridges": ["cbridge", "wormhole", "allbridge", "squid"] },
+    "AVAX": { "bridges": ["wormhole", "cbridge", "synapse", "allbridge", "squid"] },
+    "DAI": { "bridges": ["hop", "across", "synapse", "cbridge"] },
+    "ARB": { "bridges": ["squid", "cbridge", "meson"] }
+  }
+}

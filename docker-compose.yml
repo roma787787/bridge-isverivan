@@ -1,0 +1,23 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  bot:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_PATH: /app/data/bridgefinder.db
+    volumes:
+      - bot-data:/app/data
+
+volumes:
+  redis-data:
+  bot-data:
