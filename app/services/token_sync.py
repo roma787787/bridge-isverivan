@@ -76,10 +76,10 @@ class TokenIndexSyncService:
             if not network:
                 continue
             for token in tokens:
-                symbol = str(token.get("symbol", "")).strip().upper()
-                if not symbol:
+                key = self._index_key(token)
+                if not key:
                     continue
-                index.setdefault(symbol, set()).add(network)
+                index.setdefault(key, set()).add(network)
 
         filtered = {
             symbol: sorted(networks) for symbol, networks in index.items() if len(networks) >= _MIN_CHAINS_TO_INDEX
@@ -104,6 +104,23 @@ class TokenIndexSyncService:
             )
         else:
             logger.warning("Token index sync produced no eligible tickers, keeping previous data")
+
+    def _index_key(self, token: dict) -> str | None:
+        """Grouping key for a token, chosen to avoid symbol-squatting collisions.
+
+        Random/scam contracts frequently reuse a well-known ticker (e.g. some
+        unrelated token calling itself "ICP" on an EVM chain that Internet
+        Computer never touches). Li.Fi only has price data for tokens it has
+        actually verified/priced, so requiring ``priceUSD`` filters most of
+        that noise out. ``coinKey`` is Li.Fi's own cross-chain identifier for
+        a recognized asset (shared across chains for the *same* project) —
+        preferring it over the raw ``symbol`` avoids merging two unrelated
+        tokens that merely happen to share a ticker.
+        """
+        if not token.get("priceUSD"):
+            return None
+        key = str(token.get("coinKey") or token.get("symbol", "")).strip().upper()
+        return key or None
 
     def _mainnet_chain_ids(self, chains: list[dict]) -> list[str]:
         ids = []

@@ -11,7 +11,7 @@ from ..formatting import format_bridges_message, format_invalid_input_message, f
 
 router = Router(name="search")
 
-_TICKER_RE = re.compile(r"^\$?[A-Za-z0-9]{2,15}$")
+_TICKER_RE = re.compile(r"^\$?[A-Za-z0-9]{1,15}$")
 
 
 def _looks_like_plain_text(message: Message) -> bool:
