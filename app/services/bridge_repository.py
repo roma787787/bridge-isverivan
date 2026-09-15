@@ -190,8 +190,14 @@ class BridgeRepository:
                     self._coingecko.find_networks(ticker), timeout=self._coingecko_timeout
                 )
             except Exception as exc:
+                # Do NOT cache on failure (rate limit, timeout, network error, ...) —
+                # caching here would freeze a transient error into a "confirmed not
+                # found" result for the full cache TTL. Leaving it uncached means
+                # the next query for this ticker retries live instead of trusting
+                # a lookup that never actually completed.
                 logger.warning("CoinGecko lookup failed for %s: %s", ticker, exc)
-                networks = []
+                await self._cache.set_coingecko_error(ticker, str(exc))
+                return None
             await self._cache.set_coingecko_networks(ticker, networks)
 
         return self._build_aggregator_results(sorted(networks))

@@ -54,6 +54,13 @@ class CacheClient:
     async def set_coingecko_networks(self, ticker: str, networks: list[str]) -> None:
         await self._set(f"coingecko:{ticker}", json.dumps(networks))
 
+    async def get_coingecko_error(self, ticker: str) -> str | None:
+        """Last error message for a ticker whose lookup never completed successfully."""
+        return await self._get(f"coingecko:error:{ticker}")
+
+    async def set_coingecko_error(self, ticker: str, message: str) -> None:
+        await self._set(f"coingecko:error:{ticker}", message)
+
     async def _get(self, key: str) -> str | None:
         if self._redis is not None:
             try:

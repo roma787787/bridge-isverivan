@@ -16,6 +16,12 @@ class DummyCache:
     async def set_coingecko_networks(self, ticker: str, networks: list[str]) -> None:
         pass
 
+    async def get_coingecko_error(self, ticker: str):
+        return None
+
+    async def set_coingecko_error(self, ticker: str, message: str) -> None:
+        pass
+
 
 def test_curated_bridge_keys_for_reports_raw_curated_lookup():
     repo = BridgeRepository(cache=DummyCache())
@@ -238,12 +244,19 @@ async def test_suggest_tickers_includes_live_index_tickers():
 class RecordingCoingeckoCache(DummyCache):
     def __init__(self):
         self.stored: dict[str, list[str]] = {}
+        self.errors: dict[str, str] = {}
 
     async def get_coingecko_networks(self, ticker: str):
         return self.stored.get(ticker)
 
     async def set_coingecko_networks(self, ticker: str, networks: list[str]) -> None:
         self.stored[ticker] = networks
+
+    async def get_coingecko_error(self, ticker: str):
+        return self.errors.get(ticker)
+
+    async def set_coingecko_error(self, ticker: str, message: str) -> None:
+        self.errors[ticker] = message
 
 
 class FakeCoinGecko:
@@ -294,27 +307,45 @@ async def test_coingecko_negative_result_is_cached_too():
     assert cache.stored["NOPETOKEN"] == []
 
 
-async def test_coingecko_lookup_failure_degrades_to_not_found():
+async def test_coingecko_lookup_failure_degrades_to_not_found_without_poisoning_cache():
     class FailingCoinGecko:
+        def __init__(self):
+            self.call_count = 0
+
         async def find_networks(self, ticker: str) -> list[str]:
-            raise RuntimeError("rate limited")
+            self.call_count += 1
+            raise RuntimeError("429 rate limited")
 
-    repo = BridgeRepository(cache=RecordingCoingeckoCache(), coingecko=FailingCoinGecko())
+    cache = RecordingCoingeckoCache()
+    coingecko = FailingCoinGecko()
+    repo = BridgeRepository(cache=cache, coingecko=coingecko)
 
-    assert await repo.find_bridges_for_ticker("SOMENEWTOKEN") is None
+    first = await repo.find_bridges_for_ticker("SOMENEWTOKEN")
+    second = await repo.find_bridges_for_ticker("SOMENEWTOKEN")
+
+    assert first is None
+    assert second is None
+    # A failed lookup must never be cached as a confirmed "not found" — every
+    # call should retry live instead of trusting a lookup that never
+    # actually completed.
+    assert coingecko.call_count == 2
+    assert "SOMENEWTOKEN" not in cache.stored
+    assert "rate limited" in cache.errors["SOMENEWTOKEN"]
 
 
-async def test_coingecko_lookup_times_out_gracefully():
+async def test_coingecko_lookup_times_out_gracefully_without_poisoning_cache():
     class SlowCoinGecko:
         async def find_networks(self, ticker: str) -> list[str]:
             await asyncio.sleep(1)
             return ["Ethereum", "Polygon"]
 
-    repo = BridgeRepository(
-        cache=RecordingCoingeckoCache(), coingecko=SlowCoinGecko(), coingecko_timeout_seconds=0.05
-    )
+    cache = RecordingCoingeckoCache()
+    repo = BridgeRepository(cache=cache, coingecko=SlowCoinGecko(), coingecko_timeout_seconds=0.05)
 
-    assert await repo.find_bridges_for_ticker("SOMENEWTOKEN") is None
+    result = await repo.find_bridges_for_ticker("SOMENEWTOKEN")
+
+    assert result is None
+    assert "SOMENEWTOKEN" not in cache.stored
 
 
 async def test_no_coingecko_client_configured_returns_not_found():

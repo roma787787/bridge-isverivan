@@ -41,6 +41,10 @@ class CoinGeckoClient:
     def __init__(self, base_url: str, timeout_seconds: float) -> None:
         self._base_url = base_url.rstrip("/")
         self._timeout = timeout_seconds
+        # A bare httpx default User-Agent gets bot-blocked (403) by some
+        # CoinGecko edge nodes; a normal-looking browser-ish UA avoids that
+        # without needing an API key.
+        self._headers = {"User-Agent": "Mozilla/5.0 (compatible; BridgeFinderBot/1.0)"}
 
     async def find_networks(self, ticker: str) -> list[str]:
         coin_id = await self._resolve_coin_id(ticker)
@@ -51,7 +55,7 @@ class CoinGeckoClient:
         return sorted(networks)
 
     async def _resolve_coin_id(self, ticker: str) -> str | None:
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
+        async with httpx.AsyncClient(timeout=self._timeout, headers=self._headers) as client:
             response = await client.get(f"{self._base_url}/search", params={"query": ticker})
             response.raise_for_status()
             data = response.json()
@@ -70,7 +74,7 @@ class CoinGeckoClient:
         return best.get("id")
 
     async def _fetch_platforms(self, coin_id: str) -> dict[str, str]:
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
+        async with httpx.AsyncClient(timeout=self._timeout, headers=self._headers) as client:
             response = await client.get(
                 f"{self._base_url}/coins/{coin_id}",
                 params={

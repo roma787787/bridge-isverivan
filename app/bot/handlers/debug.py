@@ -46,7 +46,12 @@ async def handle_debug(
 
     coingecko_networks = await cache.get_coingecko_networks(ticker)
     if coingecko_networks is None:
-        lines.append("➖ CoinGecko ещё не запрашивался для этого тикера (запросится при следующем поиске)")
+        coingecko_error = await cache.get_coingecko_error(ticker)
+        if coingecko_error:
+            lines.append(f"⚠️ CoinGecko: последняя попытка завершилась ошибкой: {escape(coingecko_error)}")
+            lines.append("   (не закэшировано как «не найдено» — повторится при следующем поиске)")
+        else:
+            lines.append("➖ CoinGecko ещё не запрашивался для этого тикера (запросится при следующем поиске)")
     elif coingecko_networks:
         lines.append(f"✅ CoinGecko (кэш): {escape(', '.join(coingecko_networks))}")
     else:
