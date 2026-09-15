@@ -160,6 +160,7 @@ async def test_native_non_evm_chain_tickers_are_curated_with_their_own_network()
         "NEAR": "NEAR",
         "STRK": "Starknet",
         "FIL": "Filecoin",
+        "HBAR": "Hedera",
     }
     for ticker, native_network in cases.items():
         bridges = await repo.find_bridges_for_ticker(ticker)

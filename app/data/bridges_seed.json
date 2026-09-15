@@ -79,6 +79,11 @@
       "display_name": "StarkGate (official)",
       "url": "https://starkgate.starknet.io",
       "networks": ["Starknet", "Ethereum"]
+    },
+    "hashport": {
+      "display_name": "Hashport",
+      "url": "https://www.hashport.network",
+      "networks": ["Hedera", "Ethereum", "Polygon", "BNB Chain"]
     }
   },
   "tokens": {
@@ -103,6 +108,7 @@
     "FIL": { "bridges": ["axelar"] },
     "JUP": { "bridges": ["wormhole"] },
     "RAY": { "bridges": ["wormhole"] },
-    "BONK": { "bridges": ["wormhole"] }
+    "BONK": { "bridges": ["wormhole"] },
+    "HBAR": { "bridges": ["hashport"] }
   }
 }
