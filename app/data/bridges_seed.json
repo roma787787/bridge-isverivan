@@ -63,7 +63,7 @@
     "axelar": {
       "display_name": "Axelar Network",
       "url": "https://axelar.network",
-      "networks": ["Cosmos Hub", "Osmosis", "Ethereum", "Polygon", "Avalanche", "BNB Chain", "Arbitrum"]
+      "networks": ["Cosmos Hub", "Osmosis", "Filecoin", "Ethereum", "Polygon", "Avalanche", "BNB Chain", "Arbitrum"]
     },
     "snowbridge": {
       "display_name": "Snowbridge",
@@ -74,6 +74,11 @@
       "display_name": "Rainbow Bridge",
       "url": "https://rainbowbridge.app",
       "networks": ["NEAR", "Ethereum"]
+    },
+    "starkgate": {
+      "display_name": "StarkGate (official)",
+      "url": "https://starkgate.starknet.io",
+      "networks": ["Starknet", "Ethereum"]
     }
   },
   "tokens": {
@@ -93,6 +98,11 @@
     "DOT": { "bridges": ["snowbridge"] },
     "NEAR": { "bridges": ["rainbowbridge"] },
     "APT": { "bridges": ["wormhole"] },
-    "SUI": { "bridges": ["wormhole"] }
+    "SUI": { "bridges": ["wormhole"] },
+    "STRK": { "bridges": ["starkgate"] },
+    "FIL": { "bridges": ["axelar"] },
+    "JUP": { "bridges": ["wormhole"] },
+    "RAY": { "bridges": ["wormhole"] },
+    "BONK": { "bridges": ["wormhole"] }
   }
 }

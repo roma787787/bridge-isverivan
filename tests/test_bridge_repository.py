@@ -144,6 +144,8 @@ async def test_native_non_evm_chain_tickers_are_curated_with_their_own_network()
         "ATOM": "Cosmos Hub",
         "DOT": "Polkadot",
         "NEAR": "NEAR",
+        "STRK": "Starknet",
+        "FIL": "Filecoin",
     }
     for ticker, native_network in cases.items():
         bridges = await repo.find_bridges_for_ticker(ticker)
@@ -153,6 +155,16 @@ async def test_native_non_evm_chain_tickers_are_curated_with_their_own_network()
             f"{[b.networks for b in bridges]}"
         )
         assert all(not b.auto_detected for b in bridges)
+
+
+async def test_solana_native_tokens_resolve_via_generic_wormhole_bridge():
+    repo = BridgeRepository(cache=DummyCache())
+
+    for ticker in ["JUP", "RAY", "BONK"]:
+        bridges = await repo.find_bridges_for_ticker(ticker)
+        assert bridges is not None, f"{ticker} should resolve via Wormhole"
+        assert any(b.key == "wormhole" for b in bridges)
+        assert any("Solana" in b.networks for b in bridges)
 
 
 async def test_thin_curated_entry_is_supplemented_with_extra_auto_detected_networks():
