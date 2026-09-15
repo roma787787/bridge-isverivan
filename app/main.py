@@ -35,7 +35,9 @@ async def main() -> None:
 
     cache_ttl = int(settings.sync_interval_hours * 3600 * 1.5)
     cache = CacheClient(settings.redis_url, ttl_seconds=cache_ttl)
-    coingecko_client = CoinGeckoClient(settings.coingecko_base_url, settings.coingecko_timeout_seconds)
+    coingecko_client = CoinGeckoClient(
+        settings.coingecko_base_url, settings.coingecko_timeout_seconds, api_key=settings.coingecko_api_key
+    )
     bridge_repository = BridgeRepository(
         cache=cache,
         coingecko=coingecko_client,

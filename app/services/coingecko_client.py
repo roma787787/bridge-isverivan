@@ -38,13 +38,20 @@ class CoinGeckoClient:
     a symbol collision on.
     """
 
-    def __init__(self, base_url: str, timeout_seconds: float) -> None:
+    def __init__(self, base_url: str, timeout_seconds: float, api_key: str | None = None) -> None:
         self._base_url = base_url.rstrip("/")
         self._timeout = timeout_seconds
         # A bare httpx default User-Agent gets bot-blocked (403) by some
         # CoinGecko edge nodes; a normal-looking browser-ish UA avoids that
         # without needing an API key.
         self._headers = {"User-Agent": "Mozilla/5.0 (compatible; BridgeFinderBot/1.0)"}
+        # Fully anonymous access to api.coingecko.com is heavily throttled
+        # (and increasingly likely to just 429/403 from a shared cloud IP
+        # like Railway's). A free Demo API key (from coingecko.com/en/api)
+        # gets a real, documented rate limit via this header — same host,
+        # no code path change beyond adding it.
+        if api_key:
+            self._headers["x-cg-demo-api-key"] = api_key
 
     async def find_networks(self, ticker: str) -> list[str]:
         coin_id = await self._resolve_coin_id(ticker)
