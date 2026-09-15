@@ -25,7 +25,6 @@ async def test_sync_once_builds_index_and_filters_single_chain_tokens():
     chains = [
         {"id": 1, "name": "Ethereum"},
         {"id": 42161, "name": "Arbitrum One"},
-        {"id": 999999, "name": "SomeUnknownChain"},
     ]
     tokens_by_chain = {
         "1": [{"symbol": "USDT"}, {"symbol": "onlyoneth"}],
@@ -40,15 +39,42 @@ async def test_sync_once_builds_index_and_filters_single_chain_tokens():
     assert cache.stored_index == {"USDT": ["Arbitrum", "Ethereum"]}
 
 
-async def test_sync_once_ignores_unrecognized_chains():
-    chains = [{"id": 1, "name": "SomeChainWeDontTrack"}]
-    client = FakeLiFiClient(chains, {})
+async def test_sync_once_indexes_any_chain_lifi_reports_not_just_a_fixed_list():
+    chains = [
+        {"id": 1, "name": "Ethereum"},
+        {"id": 999999, "name": "Some Brand New L2"},
+    ]
+    tokens_by_chain = {
+        "1": [{"symbol": "OBSCURE"}],
+        "999999": [{"symbol": "obscure"}],
+    }
+    client = FakeLiFiClient(chains, tokens_by_chain)
     cache = RecordingCache()
     service = TokenIndexSyncService(client=client, cache=cache, interval_hours=8)
 
     await service.sync_once()
 
-    assert cache.stored_index is None
+    assert cache.stored_index == {"OBSCURE": ["Ethereum", "Some Brand New L2"]}
+
+
+async def test_sync_once_renames_known_chain_aliases_and_skips_testnets():
+    chains = [
+        {"id": 56, "name": "BSC"},
+        {"id": 137, "name": "Polygon PoS"},
+        {"id": 5, "name": "Goerli", "mainnet": False},
+    ]
+    tokens_by_chain = {
+        "56": [{"symbol": "TOK"}],
+        "137": [{"symbol": "TOK"}],
+        "5": [{"symbol": "TOK"}],
+    }
+    client = FakeLiFiClient(chains, tokens_by_chain)
+    cache = RecordingCache()
+    service = TokenIndexSyncService(client=client, cache=cache, interval_hours=8)
+
+    await service.sync_once()
+
+    assert cache.stored_index == {"TOK": ["BNB Chain", "Polygon"]}
 
 
 async def test_sync_once_survives_client_failure():

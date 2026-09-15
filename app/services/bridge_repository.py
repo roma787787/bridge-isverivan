@@ -9,7 +9,20 @@ from typing import Any
 from .cache import CacheClient
 
 _SEED_PATH = Path(__file__).resolve().parent.parent / "data" / "bridges_seed.json"
-_MIN_SHARED_NETWORKS_FOR_AUTO_MATCH = 2
+_MIN_NETWORKS_FOR_AUTO_MATCH = 2
+
+# General-purpose cross-chain swap+bridge aggregators. Unlike the curated
+# liquidity bridges above (which only route a pre-whitelisted set of
+# tokens), these route arbitrary ERC-20/SPL tokens by combining DEX
+# liquidity with whichever underlying bridge is available — so they are a
+# realistic recommendation for a token we only know "exists on N chains"
+# without knowing which specific liquidity bridge supports it.
+_GENERAL_AGGREGATORS: list[dict[str, str]] = [
+    {"key": "lifi", "display_name": "LI.FI (Jumper)", "url": "https://jumper.exchange"},
+    {"key": "rango", "display_name": "Rango Exchange", "url": "https://app.rango.exchange"},
+    {"key": "bungee", "display_name": "Bungee (Socket)", "url": "https://bungee.exchange"},
+    {"key": "squid-aggregator", "display_name": "Squid Router", "url": "https://app.squidrouter.com"},
+]
 
 
 @dataclass(frozen=True)
@@ -30,13 +43,13 @@ class BridgeRepository:
        bridges and each bridge's official site — precise, but only covers a
        hand-picked set of well-known tokens.
     2. An auto-detected layer built by ``services.token_sync`` from the
-       Li.Fi token list: any ticker that exists on 2+ chains we track is
-       matched against our curated bridges by intersecting the token's
-       chains with each bridge's currently known chains. This is a heuristic
-       (it assumes a general-purpose bridge operating on both chains can
-       likely route the token), so results from this layer are flagged via
+       Li.Fi token list: any ticker that exists on 2+ chains we track (which
+       covers the vast majority of actively traded tier-1/2/3 tokens, not
+       just a hand-picked set) is reported as reachable via general-purpose
+       cross-chain aggregators, together with the actual networks it was
+       found on. Results from this layer are flagged via
        ``BridgeInfo.auto_detected`` and the bot tells the user to double
-       check the exact route on the bridge's own site.
+       check the exact route before transferring.
 
     Either layer degrades gracefully to "not found" if its data is missing —
     curated data always ships with the app, and the auto-detected layer is
@@ -99,25 +112,20 @@ class BridgeRepository:
         if not index:
             return None
 
-        token_networks = set(index.get(ticker, []))
-        if not token_networks:
+        networks = sorted(index.get(ticker, []))
+        if len(networks) < _MIN_NETWORKS_FOR_AUTO_MATCH:
             return None
 
-        result: list[BridgeInfo] = []
-        for key, bridge in self._bridges.items():
-            bridge_networks = set(await self._networks_for(key))
-            shared = sorted(bridge_networks & token_networks)
-            if len(shared) >= _MIN_SHARED_NETWORKS_FOR_AUTO_MATCH:
-                result.append(
-                    BridgeInfo(
-                        key=key,
-                        display_name=bridge["display_name"],
-                        url=bridge["url"],
-                        networks=shared,
-                        auto_detected=True,
-                    )
-                )
-        return result or None
+        return [
+            BridgeInfo(
+                key=aggregator["key"],
+                display_name=aggregator["display_name"],
+                url=aggregator["url"],
+                networks=networks,
+                auto_detected=True,
+            )
+            for aggregator in _GENERAL_AGGREGATORS
+        ]
 
     async def suggest_tickers(self, raw: str, limit: int = 3) -> list[str]:
         known = set(self.all_known_tickers())

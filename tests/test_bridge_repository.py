@@ -62,7 +62,7 @@ async def test_live_cache_data_is_merged_into_networks():
     assert "Some New Chain" in stargate.networks
 
 
-async def test_auto_detected_layer_matches_uncurated_ticker_by_shared_networks():
+async def test_auto_detected_layer_returns_general_aggregators_for_uncurated_ticker():
     class IndexCache(DummyCache):
         async def get_token_index(self):
             return {"LSK": ["Ethereum", "Arbitrum"]}
@@ -72,13 +72,14 @@ async def test_auto_detected_layer_matches_uncurated_ticker_by_shared_networks()
     bridges = await repo.find_bridges_for_ticker("lsk")
 
     assert bridges is not None
+    assert len(bridges) == 4  # the fixed list of general-purpose aggregators
     assert all(b.auto_detected for b in bridges)
     for bridge in bridges:
-        assert set(bridge.networks) <= {"Ethereum", "Arbitrum"}
-        assert len(bridge.networks) >= 2
+        assert bridge.networks == ["Arbitrum", "Ethereum"]
+        assert bridge.url.startswith("https://")
 
 
-async def test_auto_detected_layer_requires_at_least_two_shared_networks():
+async def test_auto_detected_layer_requires_at_least_two_networks():
     class IndexCache(DummyCache):
         async def get_token_index(self):
             return {"LSK": ["Solana"]}

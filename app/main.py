@@ -43,7 +43,7 @@ async def main() -> None:
         interval_hours=settings.sync_interval_hours,
     )
 
-    lifi_client = LiFiClient(settings.lifi_base_url, settings.request_timeout_seconds)
+    lifi_client = LiFiClient(settings.lifi_base_url, settings.lifi_sync_timeout_seconds)
     token_index_sync_service = TokenIndexSyncService(
         client=lifi_client,
         cache=cache,

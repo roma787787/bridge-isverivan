@@ -23,6 +23,7 @@ class Settings:
     lifi_base_url: str
     sync_interval_hours: float
     request_timeout_seconds: float
+    lifi_sync_timeout_seconds: float
     log_level: str
 
     @classmethod
@@ -40,5 +41,6 @@ class Settings:
             lifi_base_url=os.environ.get("LIFI_BASE_URL", "https://li.quest"),
             sync_interval_hours=float(os.environ.get("SYNC_INTERVAL_HOURS", "8")),
             request_timeout_seconds=float(os.environ.get("REQUEST_TIMEOUT_SECONDS", "5")),
+            lifi_sync_timeout_seconds=float(os.environ.get("LIFI_SYNC_TIMEOUT_SECONDS", "30")),
             log_level=os.environ.get("LOG_LEVEL", "INFO"),
         )

@@ -35,9 +35,9 @@ def test_format_bridges_message_escapes_html():
 def test_format_bridges_message_flags_auto_detected():
     bridges = [
         BridgeInfo(
-            key="stargate",
-            display_name="Stargate Finance",
-            url="https://stargate.finance",
+            key="lifi",
+            display_name="LI.FI (Jumper)",
+            url="https://jumper.exchange",
             networks=["Ethereum", "Arbitrum"],
             auto_detected=True,
         )
@@ -45,7 +45,8 @@ def test_format_bridges_message_flags_auto_detected():
 
     text = format_bridges_message("LSK", bridges)
 
-    assert "автоматически" in text
+    assert "агрегаторы" in text.lower()
+    assert "курируемом списке" in text
 
 
 def test_format_bridges_message_no_disclaimer_for_curated_results():
@@ -60,7 +61,8 @@ def test_format_bridges_message_no_disclaimer_for_curated_results():
 
     text = format_bridges_message("USDT", bridges)
 
-    assert "автоматически" not in text
+    assert "курируемом списке" not in text
+    assert "Доступные мосты" in text
 
 
 def test_format_not_found_with_suggestions():
