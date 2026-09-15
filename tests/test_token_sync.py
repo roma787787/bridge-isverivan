@@ -16,9 +16,13 @@ class FakeLiFiClient:
 class RecordingCache:
     def __init__(self):
         self.stored_index = None
+        self.stored_meta = None
 
     async def set_token_index(self, index):
         self.stored_index = index
+
+    async def set_token_index_meta(self, meta):
+        self.stored_meta = meta
 
 
 async def test_sync_once_builds_index_and_filters_single_chain_tokens():
@@ -75,6 +79,29 @@ async def test_sync_once_renames_known_chain_aliases_and_skips_testnets():
     await service.sync_once()
 
     assert cache.stored_index == {"TOK": ["BNB Chain", "Polygon"]}
+
+
+async def test_sync_once_records_diagnostic_metadata():
+    chains = [
+        {"id": 1, "name": "Ethereum"},
+        {"id": 42161, "name": "Arbitrum One"},
+        {"id": 10, "name": "Optimism"},
+    ]
+    tokens_by_chain = {
+        "1": [{"symbol": "USDT"}],
+        "42161": [{"symbol": "USDT"}],
+        "10": [],  # Li.Fi returned nothing for this chain
+    }
+    client = FakeLiFiClient(chains, tokens_by_chain)
+    cache = RecordingCache()
+    service = TokenIndexSyncService(client=client, cache=cache, interval_hours=8)
+
+    await service.sync_once()
+
+    assert cache.stored_meta["chain_count"] == 3
+    assert cache.stored_meta["chains_with_tokens"] == 2
+    assert cache.stored_meta["ticker_count"] == 1
+    assert "updated_at" in cache.stored_meta
 
 
 async def test_sync_once_survives_client_failure():

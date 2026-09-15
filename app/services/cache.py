@@ -39,6 +39,13 @@ class CacheClient:
     async def set_token_index(self, index: dict[str, list[str]]) -> None:
         await self._set("token:index", json.dumps(index))
 
+    async def get_token_index_meta(self) -> dict | None:
+        raw = await self._get("token:index:meta")
+        return json.loads(raw) if raw else None
+
+    async def set_token_index_meta(self, meta: dict) -> None:
+        await self._set("token:index:meta", json.dumps(meta))
+
     async def _get(self, key: str) -> str | None:
         if self._redis is not None:
             try:

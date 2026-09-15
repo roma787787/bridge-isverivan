@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import datetime, timezone
 
 from .cache import CacheClient
 from .lifi_client import LiFiClient
@@ -84,10 +85,22 @@ class TokenIndexSyncService:
             symbol: sorted(networks) for symbol, networks in index.items() if len(networks) >= _MIN_CHAINS_TO_INDEX
         }
 
+        chains_with_tokens = sum(1 for tokens in tokens_by_chain.values() if tokens)
+        meta = {
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "chain_count": len(chain_ids),
+            "chains_with_tokens": chains_with_tokens,
+            "ticker_count": len(filtered),
+        }
+        await self._cache.set_token_index_meta(meta)
+
         if filtered:
             await self._cache.set_token_index(filtered)
             logger.info(
-                "Token index sync complete: %d tickers indexed across %d chains", len(filtered), len(chain_ids)
+                "Token index sync complete: %d tickers indexed across %d/%d chains with data",
+                len(filtered),
+                chains_with_tokens,
+                len(chain_ids),
             )
         else:
             logger.warning("Token index sync produced no eligible tickers, keeping previous data")

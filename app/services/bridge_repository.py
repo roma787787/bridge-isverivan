@@ -83,6 +83,10 @@ class BridgeRepository:
     def bridge_keys(self) -> set[str]:
         return set(self._bridges.keys())
 
+    def curated_bridge_keys_for(self, ticker: str) -> list[str] | None:
+        """Raw curated lookup, bypassing the auto-detected layer — used by /debug."""
+        return self._tokens.get(ticker.upper())
+
     def all_known_tickers(self) -> list[str]:
         return list(self._tokens.keys())
 

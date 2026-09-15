@@ -9,6 +9,14 @@ class DummyCache:
         return None
 
 
+def test_curated_bridge_keys_for_reports_raw_curated_lookup():
+    repo = BridgeRepository(cache=DummyCache())
+
+    assert repo.curated_bridge_keys_for("usdt") == repo.curated_bridge_keys_for("USDT")
+    assert repo.curated_bridge_keys_for("USDT")
+    assert repo.curated_bridge_keys_for("NOT_A_REAL_TICKER") is None
+
+
 async def test_find_bridges_is_case_insensitive():
     repo = BridgeRepository(cache=DummyCache())
 

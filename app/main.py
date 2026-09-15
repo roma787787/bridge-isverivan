@@ -8,6 +8,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 
+from .bot.handlers import debug as debug_handlers
 from .bot.handlers import search as search_handlers
 from .bot.handlers import start as start_handlers
 from .bot.handlers import stats as stats_handlers
@@ -54,6 +55,7 @@ async def main() -> None:
     dp = Dispatcher()
     dp.include_router(start_handlers.router)
     dp.include_router(stats_handlers.router)
+    dp.include_router(debug_handlers.router)
     dp.include_router(search_handlers.router)
 
     sync_task = asyncio.create_task(sync_service.run_forever())
@@ -65,6 +67,7 @@ async def main() -> None:
             bridge_repository=bridge_repository,
             storage=storage,
             settings=settings,
+            cache=cache,
         )
     finally:
         sync_task.cancel()
