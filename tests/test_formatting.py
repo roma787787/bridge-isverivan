@@ -32,6 +32,37 @@ def test_format_bridges_message_escapes_html():
     assert "A &amp; B" in text
 
 
+def test_format_bridges_message_flags_auto_detected():
+    bridges = [
+        BridgeInfo(
+            key="stargate",
+            display_name="Stargate Finance",
+            url="https://stargate.finance",
+            networks=["Ethereum", "Arbitrum"],
+            auto_detected=True,
+        )
+    ]
+
+    text = format_bridges_message("LSK", bridges)
+
+    assert "автоматически" in text
+
+
+def test_format_bridges_message_no_disclaimer_for_curated_results():
+    bridges = [
+        BridgeInfo(
+            key="stargate",
+            display_name="Stargate Finance",
+            url="https://stargate.finance",
+            networks=["Ethereum", "Arbitrum"],
+        )
+    ]
+
+    text = format_bridges_message("USDT", bridges)
+
+    assert "автоматически" not in text
+
+
 def test_format_not_found_with_suggestions():
     text = format_not_found_message("USDR", ["USDT", "USDC"])
 

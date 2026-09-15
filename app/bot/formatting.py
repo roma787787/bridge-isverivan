@@ -13,6 +13,13 @@ def format_bridges_message(ticker: str, bridges: list[BridgeInfo]) -> str:
         lines.append(f"• Поддерживаемые сети: {networks}")
         lines.append(f"• Ссылка: {escape(bridge.url)}")
         lines.append("")
+
+    if any(bridge.auto_detected for bridge in bridges):
+        lines.append(
+            "⚠️ Поддержка этого токена определена автоматически по наличию сети — "
+            "уточняйте точный маршрут и сумму на сайте моста перед переводом."
+        )
+
     return "\n".join(lines).rstrip()
 
 

@@ -16,7 +16,9 @@ from .db.repository import Storage
 from .services.bridge_repository import BridgeRepository
 from .services.cache import CacheClient
 from .services.defillama_client import DefiLlamaClient
+from .services.lifi_client import LiFiClient
 from .services.sync import BridgeSyncService
+from .services.token_sync import TokenIndexSyncService
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +43,13 @@ async def main() -> None:
         interval_hours=settings.sync_interval_hours,
     )
 
+    lifi_client = LiFiClient(settings.lifi_base_url, settings.request_timeout_seconds)
+    token_index_sync_service = TokenIndexSyncService(
+        client=lifi_client,
+        cache=cache,
+        interval_hours=settings.sync_interval_hours,
+    )
+
     bot = Bot(token=settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher()
     dp.include_router(start_handlers.router)
@@ -48,6 +57,7 @@ async def main() -> None:
     dp.include_router(search_handlers.router)
 
     sync_task = asyncio.create_task(sync_service.run_forever())
+    token_index_sync_task = asyncio.create_task(token_index_sync_service.run_forever())
 
     try:
         await dp.start_polling(
@@ -58,6 +68,7 @@ async def main() -> None:
         )
     finally:
         sync_task.cancel()
+        token_index_sync_task.cancel()
         await cache.close()
         await storage.close()
 

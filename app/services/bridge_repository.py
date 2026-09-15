@@ -9,6 +9,7 @@ from typing import Any
 from .cache import CacheClient
 
 _SEED_PATH = Path(__file__).resolve().parent.parent / "data" / "bridges_seed.json"
+_MIN_SHARED_NETWORKS_FOR_AUTO_MATCH = 2
 
 
 @dataclass(frozen=True)
@@ -17,19 +18,29 @@ class BridgeInfo:
     display_name: str
     url: str
     networks: list[str]
+    auto_detected: bool = False
 
 
 class BridgeRepository:
     """Resolves which bridges support a given token ticker.
 
-    The bundled ``bridges_seed.json`` is a curated reference dataset mapping
-    tickers to bridges and each bridge's official site. It is not fetched
-    live because the free DefiLlama Bridges endpoint reports bridges and the
-    chains they operate on, not which specific tokens they support, and a
-    fully live per-token lookup requires a paid/aggregator API. Instead, the
-    periodic sync job (see ``services.sync``) refreshes each bridge's chain
-    list from DefiLlama so the "supported networks" shown to users stays
-    current even though the token-to-bridge mapping itself is curated.
+    Two layers of data are combined:
+
+    1. A curated reference dataset (``bridges_seed.json``) mapping tickers to
+       bridges and each bridge's official site — precise, but only covers a
+       hand-picked set of well-known tokens.
+    2. An auto-detected layer built by ``services.token_sync`` from the
+       Li.Fi token list: any ticker that exists on 2+ chains we track is
+       matched against our curated bridges by intersecting the token's
+       chains with each bridge's currently known chains. This is a heuristic
+       (it assumes a general-purpose bridge operating on both chains can
+       likely route the token), so results from this layer are flagged via
+       ``BridgeInfo.auto_detected`` and the bot tells the user to double
+       check the exact route on the bridge's own site.
+
+    Either layer degrades gracefully to "not found" if its data is missing —
+    curated data always ships with the app, and the auto-detected layer is
+    simply absent until the first successful background sync.
     """
 
     def __init__(self, cache: CacheClient, seed_path: Path = _SEED_PATH) -> None:
@@ -61,7 +72,16 @@ class BridgeRepository:
         return merged
 
     async def find_bridges_for_ticker(self, ticker: str) -> list[BridgeInfo] | None:
-        bridge_keys = self._tokens.get(ticker.upper())
+        ticker = ticker.upper()
+
+        curated = await self._find_curated(ticker)
+        if curated is not None:
+            return curated
+
+        return await self._find_auto_detected(ticker)
+
+    async def _find_curated(self, ticker: str) -> list[BridgeInfo] | None:
+        bridge_keys = self._tokens.get(ticker)
         if not bridge_keys:
             return None
 
@@ -74,5 +94,34 @@ class BridgeRepository:
             )
         return result
 
-    def suggest_tickers(self, raw: str, limit: int = 3) -> list[str]:
-        return difflib.get_close_matches(raw.upper(), self.all_known_tickers(), n=limit, cutoff=0.5)
+    async def _find_auto_detected(self, ticker: str) -> list[BridgeInfo] | None:
+        index = await self._cache.get_token_index()
+        if not index:
+            return None
+
+        token_networks = set(index.get(ticker, []))
+        if not token_networks:
+            return None
+
+        result: list[BridgeInfo] = []
+        for key, bridge in self._bridges.items():
+            bridge_networks = set(await self._networks_for(key))
+            shared = sorted(bridge_networks & token_networks)
+            if len(shared) >= _MIN_SHARED_NETWORKS_FOR_AUTO_MATCH:
+                result.append(
+                    BridgeInfo(
+                        key=key,
+                        display_name=bridge["display_name"],
+                        url=bridge["url"],
+                        networks=shared,
+                        auto_detected=True,
+                    )
+                )
+        return result or None
+
+    async def suggest_tickers(self, raw: str, limit: int = 3) -> list[str]:
+        known = set(self.all_known_tickers())
+        index = await self._cache.get_token_index()
+        if index:
+            known |= set(index.keys())
+        return difflib.get_close_matches(raw.upper(), known, n=limit, cutoff=0.5)

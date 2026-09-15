@@ -20,6 +20,7 @@ class Settings:
     redis_url: str
     database_path: str
     defillama_base_url: str
+    lifi_base_url: str
     sync_interval_hours: float
     request_timeout_seconds: float
     log_level: str
@@ -36,6 +37,7 @@ class Settings:
             redis_url=os.environ.get("REDIS_URL", "redis://localhost:6379/0"),
             database_path=os.environ.get("DATABASE_PATH", "data/bridgefinder.db"),
             defillama_base_url=os.environ.get("DEFILLAMA_BASE_URL", "https://bridges.llama.fi"),
+            lifi_base_url=os.environ.get("LIFI_BASE_URL", "https://li.quest"),
             sync_interval_hours=float(os.environ.get("SYNC_INTERVAL_HOURS", "8")),
             request_timeout_seconds=float(os.environ.get("REQUEST_TIMEOUT_SECONDS", "5")),
             log_level=os.environ.get("LOG_LEVEL", "INFO"),

@@ -39,5 +39,5 @@ async def handle_ticker(message: Message, bridge_repository: BridgeRepository, s
         return
 
     await storage.log_query(message.from_user.id, ticker, matched=False)
-    suggestions = bridge_repository.suggest_tickers(ticker)
+    suggestions = await bridge_repository.suggest_tickers(ticker)
     await message.answer(format_not_found_message(ticker, suggestions))
