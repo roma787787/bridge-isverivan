@@ -32,6 +32,17 @@ _GENERAL_AGGREGATORS: list[dict[str, str]] = [
     {"key": "squid-aggregator", "display_name": "Squid Router", "url": "https://app.squidrouter.com"},
 ]
 
+# Manual fallback for well-known tickers whose multi-chain existence is not
+# reliably reflected in Li.Fi's free token feed (it can list a token only
+# under its own native chain even when the token demonstrably also exists
+# elsewhere, e.g. an L2 governance token that's canonically bridged from
+# Ethereum). Only add an entry here when you are certain the ticker exists
+# natively on every listed network — this is used as a last resort when the
+# live index doesn't already have 2+ networks for the ticker.
+_MANUAL_NETWORK_FALLBACKS: dict[str, list[str]] = {
+    "OP": ["Ethereum", "Optimism"],
+}
+
 
 @dataclass(frozen=True)
 class BridgeInfo:
@@ -57,7 +68,9 @@ class BridgeRepository:
        cross-chain aggregators, together with the actual networks it was
        found on. Results from this layer are flagged via
        ``BridgeInfo.auto_detected`` and the bot tells the user to double
-       check the exact route before transferring.
+       check the exact route before transferring. A small manual fallback
+       table (``_MANUAL_NETWORK_FALLBACKS``) covers well-known tickers that
+       Li.Fi's free token feed doesn't reliably list on 2+ chains.
 
     A curated entry with few bridges (typically a native non-EVM chain like
     TON/BTC/DOT that only has one official bridge) is topped up with any
@@ -138,11 +151,8 @@ class BridgeRepository:
         return result
 
     async def _find_auto_detected(self, ticker: str) -> list[BridgeInfo] | None:
-        index = await self._cache.get_token_index()
-        if not index:
-            return None
-
-        networks = sorted(index.get(ticker, []))
+        index = await self._cache.get_token_index() or {}
+        networks = sorted(index.get(ticker) or _MANUAL_NETWORK_FALLBACKS.get(ticker, []))
         if len(networks) < _MIN_NETWORKS_FOR_AUTO_MATCH:
             return None
 

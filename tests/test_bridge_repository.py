@@ -97,6 +97,31 @@ async def test_auto_detected_layer_requires_at_least_two_networks():
     assert await repo.find_bridges_for_ticker("LSK") is None
 
 
+async def test_manual_network_fallback_resolves_ticker_missing_from_live_index():
+    # OP isn't in the curated dataset and Li.Fi's free feed doesn't reliably
+    # list it on 2+ chains, so a hand-maintained fallback covers it.
+    repo = BridgeRepository(cache=DummyCache())
+
+    bridges = await repo.find_bridges_for_ticker("op")
+
+    assert bridges is not None
+    assert all(b.auto_detected for b in bridges)
+    assert all(set(b.networks) == {"Ethereum", "Optimism"} for b in bridges)
+
+
+async def test_manual_network_fallback_is_overridden_by_live_index_when_present():
+    class IndexCache(DummyCache):
+        async def get_token_index(self):
+            return {"OP": ["Ethereum", "Optimism", "Base"]}
+
+    repo = BridgeRepository(cache=IndexCache())
+
+    bridges = await repo.find_bridges_for_ticker("OP")
+
+    assert bridges is not None
+    assert all("Base" in b.networks for b in bridges)
+
+
 async def test_curated_ticker_takes_precedence_over_auto_detected_index():
     class IndexCache(DummyCache):
         async def get_token_index(self):
