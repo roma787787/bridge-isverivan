@@ -33,7 +33,7 @@
     "wormhole": {
       "display_name": "Wormhole (Portal Bridge)",
       "url": "https://portalbridge.com",
-      "networks": ["Ethereum", "Solana", "BNB Chain", "Polygon", "Avalanche", "Arbitrum", "Optimism", "Base"]
+      "networks": ["Ethereum", "Solana", "BNB Chain", "Polygon", "Avalanche", "Arbitrum", "Optimism", "Base", "Aptos", "Sui"]
     },
     "allbridge": {
       "display_name": "Allbridge",
@@ -49,6 +49,31 @@
       "display_name": "Meson.fi",
       "url": "https://meson.fi",
       "networks": ["Ethereum", "Arbitrum", "Optimism", "Polygon", "BNB Chain", "zkSync Era"]
+    },
+    "tonbridge": {
+      "display_name": "TON Bridge (official)",
+      "url": "https://bridge.ton.org",
+      "networks": ["TON", "Ethereum", "BNB Chain"]
+    },
+    "tbtc": {
+      "display_name": "tBTC (Threshold Network)",
+      "url": "https://threshold.network",
+      "networks": ["Bitcoin", "Ethereum", "Arbitrum", "Optimism", "Base", "Polygon"]
+    },
+    "axelar": {
+      "display_name": "Axelar Network",
+      "url": "https://axelar.network",
+      "networks": ["Cosmos Hub", "Osmosis", "Ethereum", "Polygon", "Avalanche", "BNB Chain", "Arbitrum"]
+    },
+    "snowbridge": {
+      "display_name": "Snowbridge",
+      "url": "https://snowbridge.network",
+      "networks": ["Polkadot", "Ethereum"]
+    },
+    "rainbowbridge": {
+      "display_name": "Rainbow Bridge",
+      "url": "https://rainbowbridge.app",
+      "networks": ["NEAR", "Ethereum"]
     }
   },
   "tokens": {
@@ -61,6 +86,13 @@
     "BNB": { "bridges": ["cbridge", "wormhole", "allbridge", "squid"] },
     "AVAX": { "bridges": ["wormhole", "cbridge", "synapse", "allbridge", "squid"] },
     "DAI": { "bridges": ["hop", "across", "synapse", "cbridge"] },
-    "ARB": { "bridges": ["squid", "cbridge", "meson"] }
+    "ARB": { "bridges": ["squid", "cbridge", "meson"] },
+    "TON": { "bridges": ["tonbridge"] },
+    "BTC": { "bridges": ["tbtc"] },
+    "ATOM": { "bridges": ["axelar"] },
+    "DOT": { "bridges": ["snowbridge"] },
+    "NEAR": { "bridges": ["rainbowbridge"] },
+    "APT": { "bridges": ["wormhole"] },
+    "SUI": { "bridges": ["wormhole"] }
   }
 }

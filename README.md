@@ -59,6 +59,13 @@ app/
    (`https://bridges.llama.fi/bridges`) отдаёт список активных мостов и
    сети, в которых они сейчас работают, — `services/sync.py` тянет это раз
    в `SYNC_INTERVAL_HOURS` часов и обновляет кэш.
+   Сюда же входят официальные мосты для нативных не-EVM/не-Solana сетей —
+   **TON** (`bridge.ton.org`), **Bitcoin** через tBTC (`threshold.network`),
+   **Cosmos Hub** через Axelar, **Polkadot** через Snowbridge, **NEAR** через
+   Rainbow Bridge, а также Aptos/Sui через Wormhole. Li.Fi эти сети не
+   отслеживает (это EVM/Solana-ориентированный агрегатор), поэтому без
+   такого курируемого дополнения, например, `TON` находился бы только как
+   wrapped-версия на EVM-сетях — без самой сети TON в ответе.
 2. **Слой автоопределения.** Для любого тикера, которого нет в курируемом
    справочнике (например, `LSK`), `services/token_sync.py` раз в
    `SYNC_INTERVAL_HOURS` часов запрашивает у **Li.Fi API**

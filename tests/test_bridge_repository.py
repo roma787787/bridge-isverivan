@@ -102,6 +102,26 @@ async def test_curated_ticker_takes_precedence_over_auto_detected_index():
     assert all(not b.auto_detected for b in bridges)
 
 
+async def test_native_non_evm_chain_tickers_are_curated_with_their_own_network():
+    repo = BridgeRepository(cache=DummyCache())
+
+    cases = {
+        "TON": "TON",
+        "BTC": "Bitcoin",
+        "ATOM": "Cosmos Hub",
+        "DOT": "Polkadot",
+        "NEAR": "NEAR",
+    }
+    for ticker, native_network in cases.items():
+        bridges = await repo.find_bridges_for_ticker(ticker)
+        assert bridges is not None, f"{ticker} should resolve to a curated bridge"
+        assert any(native_network in b.networks for b in bridges), (
+            f"{ticker} should list its native network {native_network!r}, got "
+            f"{[b.networks for b in bridges]}"
+        )
+        assert all(not b.auto_detected for b in bridges)
+
+
 async def test_suggest_tickers_includes_live_index_tickers():
     class IndexCache(DummyCache):
         async def get_token_index(self):
