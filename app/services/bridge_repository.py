@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import asyncio
 import difflib
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from .cache import CacheClient
+from .coingecko_client import CoinGeckoClient
+
+logger = logging.getLogger(__name__)
 
 _SEED_PATH = Path(__file__).resolve().parent.parent / "data" / "bridges_seed.json"
 _MIN_NETWORKS_FOR_AUTO_MATCH = 2
@@ -71,6 +76,14 @@ class BridgeRepository:
        check the exact route before transferring. A small manual fallback
        table (``_MANUAL_NETWORK_FALLBACKS``) covers well-known tickers that
        Li.Fi's free token feed doesn't reliably list on 2+ chains.
+    3. An on-demand CoinGecko lookup, tried only when neither of the above
+       resolves anything. CoinGecko's per-project ``platforms`` field is a
+       canonical, verified chain list for one specific project (picked by
+       market cap rank among same-symbol matches), so it catches gaps in
+       Li.Fi's per-chain token scan without the same symbol-collision risk.
+       It runs live at request time under a strict timeout and its result
+       (including "found nothing") is cached to avoid repeatedly hitting
+       CoinGecko's rate-limited free tier for the same ticker.
 
     A curated entry with few bridges (typically a native non-EVM chain like
     TON/BTC/DOT that only has one official bridge) is topped up with any
@@ -83,7 +96,13 @@ class BridgeRepository:
     simply absent until the first successful background sync.
     """
 
-    def __init__(self, cache: CacheClient, seed_path: Path = _SEED_PATH) -> None:
+    def __init__(
+        self,
+        cache: CacheClient,
+        seed_path: Path = _SEED_PATH,
+        coingecko: CoinGeckoClient | None = None,
+        coingecko_timeout_seconds: float = 3.0,
+    ) -> None:
         with open(seed_path, "r", encoding="utf-8") as fh:
             seed: dict[str, Any] = json.load(fh)
 
@@ -92,6 +111,8 @@ class BridgeRepository:
         }
         self._bridges: dict[str, dict[str, Any]] = seed["bridges"]
         self._cache = cache
+        self._coingecko = coingecko
+        self._coingecko_timeout = coingecko_timeout_seconds
 
     def bridge_keys(self) -> set[str]:
         return set(self._bridges.keys())
@@ -120,7 +141,10 @@ class BridgeRepository:
 
         curated = await self._find_curated(ticker)
         if curated is None:
-            return await self._find_auto_detected(ticker)
+            auto_detected = await self._find_auto_detected(ticker)
+            if auto_detected is not None:
+                return auto_detected
+            return await self._find_via_coingecko(ticker)
 
         if len(curated) >= _SUPPLEMENT_CURATED_BELOW:
             return curated
@@ -153,6 +177,26 @@ class BridgeRepository:
     async def _find_auto_detected(self, ticker: str) -> list[BridgeInfo] | None:
         index = await self._cache.get_token_index() or {}
         networks = sorted(index.get(ticker) or _MANUAL_NETWORK_FALLBACKS.get(ticker, []))
+        return self._build_aggregator_results(networks)
+
+    async def _find_via_coingecko(self, ticker: str) -> list[BridgeInfo] | None:
+        if self._coingecko is None:
+            return None
+
+        networks = await self._cache.get_coingecko_networks(ticker)
+        if networks is None:
+            try:
+                networks = await asyncio.wait_for(
+                    self._coingecko.find_networks(ticker), timeout=self._coingecko_timeout
+                )
+            except Exception as exc:
+                logger.warning("CoinGecko lookup failed for %s: %s", ticker, exc)
+                networks = []
+            await self._cache.set_coingecko_networks(ticker, networks)
+
+        return self._build_aggregator_results(sorted(networks))
+
+    def _build_aggregator_results(self, networks: list[str]) -> list[BridgeInfo] | None:
         if len(networks) < _MIN_NETWORKS_FOR_AUTO_MATCH:
             return None
 

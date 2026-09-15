@@ -24,6 +24,8 @@ class Settings:
     sync_interval_hours: float
     request_timeout_seconds: float
     lifi_sync_timeout_seconds: float
+    coingecko_base_url: str
+    coingecko_timeout_seconds: float
     log_level: str
 
     @classmethod
@@ -42,5 +44,7 @@ class Settings:
             sync_interval_hours=float(os.environ.get("SYNC_INTERVAL_HOURS", "8")),
             request_timeout_seconds=float(os.environ.get("REQUEST_TIMEOUT_SECONDS", "5")),
             lifi_sync_timeout_seconds=float(os.environ.get("LIFI_SYNC_TIMEOUT_SECONDS", "30")),
+            coingecko_base_url=os.environ.get("COINGECKO_BASE_URL", "https://api.coingecko.com/api/v3"),
+            coingecko_timeout_seconds=float(os.environ.get("COINGECKO_TIMEOUT_SECONDS", "3")),
             log_level=os.environ.get("LOG_LEVEL", "INFO"),
         )

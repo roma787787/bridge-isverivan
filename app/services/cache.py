@@ -46,6 +46,14 @@ class CacheClient:
     async def set_token_index_meta(self, meta: dict) -> None:
         await self._set("token:index:meta", json.dumps(meta))
 
+    async def get_coingecko_networks(self, ticker: str) -> list[str] | None:
+        """Returns None when never looked up; [] means "looked up, found nothing"."""
+        raw = await self._get(f"coingecko:{ticker}")
+        return json.loads(raw) if raw else None
+
+    async def set_coingecko_networks(self, ticker: str, networks: list[str]) -> None:
+        await self._set(f"coingecko:{ticker}", json.dumps(networks))
+
     async def _get(self, key: str) -> str | None:
         if self._redis is not None:
             try:

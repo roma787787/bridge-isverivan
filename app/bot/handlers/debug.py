@@ -44,6 +44,14 @@ async def handle_debug(
     else:
         lines.append("❌ В live-индексе Li.Fi нет (или существует меньше чем на 2 сетях)")
 
+    coingecko_networks = await cache.get_coingecko_networks(ticker)
+    if coingecko_networks is None:
+        lines.append("➖ CoinGecko ещё не запрашивался для этого тикера (запросится при следующем поиске)")
+    elif coingecko_networks:
+        lines.append(f"✅ CoinGecko (кэш): {escape(', '.join(coingecko_networks))}")
+    else:
+        lines.append("❌ CoinGecko (кэш): проверяли, ничего не нашли")
+
     meta = await cache.get_token_index_meta()
     lines.append("")
     if meta:

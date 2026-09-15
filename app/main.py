@@ -16,6 +16,7 @@ from .config import Settings
 from .db.repository import Storage
 from .services.bridge_repository import BridgeRepository
 from .services.cache import CacheClient
+from .services.coingecko_client import CoinGeckoClient
 from .services.defillama_client import DefiLlamaClient
 from .services.lifi_client import LiFiClient
 from .services.sync import BridgeSyncService
@@ -34,7 +35,12 @@ async def main() -> None:
 
     cache_ttl = int(settings.sync_interval_hours * 3600 * 1.5)
     cache = CacheClient(settings.redis_url, ttl_seconds=cache_ttl)
-    bridge_repository = BridgeRepository(cache=cache)
+    coingecko_client = CoinGeckoClient(settings.coingecko_base_url, settings.coingecko_timeout_seconds)
+    bridge_repository = BridgeRepository(
+        cache=cache,
+        coingecko=coingecko_client,
+        coingecko_timeout_seconds=settings.coingecko_timeout_seconds,
+    )
 
     defillama_client = DefiLlamaClient(settings.defillama_base_url, settings.request_timeout_seconds)
     sync_service = BridgeSyncService(
