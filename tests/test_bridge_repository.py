@@ -137,6 +137,18 @@ async def test_manual_network_fallback_covers_coingecko_split_listing_case():
     assert all(set(b.networks) == {"Ethereum", "BNB Chain", "Polygon"} for b in bridges)
 
 
+async def test_manual_network_fallback_covers_pyth_wormhole_bridged_governance_token():
+    # PYTH's token is Solana-native but was bridged to Ethereum via Wormhole
+    # for the Nov 2023 governance airdrop; CoinGecko's canonical entry only
+    # reports Solana.
+    repo = BridgeRepository(cache=DummyCache())
+
+    bridges = await repo.find_bridges_for_ticker("PYTH")
+
+    assert bridges is not None
+    assert all(set(b.networks) == {"Solana", "Ethereum"} for b in bridges)
+
+
 async def test_manual_network_fallback_is_overridden_by_live_index_when_present():
     class IndexCache(DummyCache):
         async def get_token_index(self):

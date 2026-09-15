@@ -53,6 +53,7 @@ _GENERAL_AGGREGATORS: list[dict[str, str]] = [
 _MANUAL_NETWORK_FALLBACKS: dict[str, list[str]] = {
     "OP": ["Ethereum", "Optimism"],
     "SHIB": ["Ethereum", "BNB Chain", "Polygon"],
+    "PYTH": ["Solana", "Ethereum"],
 }
 
 
