@@ -22,7 +22,11 @@ _PLATFORM_TO_NETWORK: dict[str, str] = {
     "fantom": "Fantom",
     "near-protocol": "NEAR",
     "polkadot": "Polkadot",
-    "cosmos": "Cosmos Hub",
+    # CoinGecko's "cosmos" platform id is a generic tag for IBC/Cosmos-SDK
+    # tokens, not necessarily the Cosmos Hub chain specifically (e.g. it
+    # shows up for OSMO, which is native to Osmosis, not Cosmos Hub) — keep
+    # the label generic rather than overclaiming a specific chain.
+    "cosmos": "Cosmos",
     "the-open-network": "TON",
 }
 

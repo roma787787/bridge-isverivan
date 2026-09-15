@@ -373,6 +373,13 @@ async def test_coingecko_lookup_times_out_gracefully_without_poisoning_cache():
 
     assert result is None
     assert "SOMENEWTOKEN" not in cache.stored
+    # A bare asyncio.TimeoutError stringifies to "" — that must not leave the
+    # error cache empty/falsy, or explain_miss() would misreport a timeout
+    # as "never checked" instead of "checked, timed out".
+    assert cache.errors["SOMENEWTOKEN"]
+    reason = await repo.explain_miss("SOMENEWTOKEN")
+    assert "ещё не проверялся" not in reason
+    assert "ошибкой" in reason
 
 
 async def test_no_coingecko_client_configured_returns_not_found():

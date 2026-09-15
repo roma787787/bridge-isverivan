@@ -203,8 +203,15 @@ class BridgeRepository:
                 # found" result for the full cache TTL. Leaving it uncached means
                 # the next query for this ticker retries live instead of trusting
                 # a lookup that never actually completed.
-                logger.warning("CoinGecko lookup failed for %s: %s", ticker, exc)
-                await self._cache.set_coingecko_error(ticker, str(exc))
+                #
+                # str(exc) is empty for exceptions raised with no message — a bare
+                # asyncio.TimeoutError being the common case — which would make the
+                # cached "error" falsy and get misread by explain_miss() as "never
+                # checked" instead of "checked, timed out". Fall back to the
+                # exception's class name so there's always something to show.
+                message = str(exc) or type(exc).__name__
+                logger.warning("CoinGecko lookup failed for %s: %s", ticker, message)
+                await self._cache.set_coingecko_error(ticker, message)
                 return None
             await self._cache.set_coingecko_networks(ticker, networks)
 
@@ -256,7 +263,7 @@ class BridgeRepository:
             error = await self._cache.get_coingecko_error(ticker)
             cached = await self._cache.get_coingecko_networks(ticker)
             if cached is None:
-                if error:
+                if error is not None:
                     parts.append(f"CoinGecko: запрос завершился ошибкой «{error}», повторится при следующем поиске")
                 else:
                     parts.append("CoinGecko ещё не проверялся")
