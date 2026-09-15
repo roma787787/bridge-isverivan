@@ -38,14 +38,21 @@ _GENERAL_AGGREGATORS: list[dict[str, str]] = [
 ]
 
 # Manual fallback for well-known tickers whose multi-chain existence is not
-# reliably reflected in Li.Fi's free token feed (it can list a token only
-# under its own native chain even when the token demonstrably also exists
-# elsewhere, e.g. an L2 governance token that's canonically bridged from
-# Ethereum). Only add an entry here when you are certain the ticker exists
-# natively on every listed network — this is used as a last resort when the
-# live index doesn't already have 2+ networks for the ticker.
+# reliably reflected by either live source. Two known causes:
+#   - Li.Fi's per-chain token scan can list a token only under its own
+#     native chain even when it demonstrably also exists elsewhere (e.g. an
+#     L2 governance token canonically bridged from Ethereum, like OP).
+#   - CoinGecko often tracks a community/third-party-bridged version of a
+#     very popular token as an entirely separate coin id rather than adding
+#     it to the origin coin's `platforms` field, so its canonical entry
+#     undercounts networks (e.g. SHIB — Ethereum, BNB Chain and Polygon for
+#     years, but CoinGecko's "shiba-inu" entry alone only reports Ethereum).
+# Only add an entry here when you are certain the ticker exists natively on
+# every listed network — this is used as a last resort when neither live
+# source already has 2+ networks for the ticker.
 _MANUAL_NETWORK_FALLBACKS: dict[str, list[str]] = {
     "OP": ["Ethereum", "Optimism"],
+    "SHIB": ["Ethereum", "BNB Chain", "Polygon"],
 }
 
 

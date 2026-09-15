@@ -123,6 +123,20 @@ async def test_manual_network_fallback_resolves_ticker_missing_from_live_index()
     assert all(set(b.networks) == {"Ethereum", "Optimism"} for b in bridges)
 
 
+async def test_manual_network_fallback_covers_coingecko_split_listing_case():
+    # SHIB is genuinely multi-chain (Ethereum, BNB Chain, Polygon for years),
+    # but CoinGecko tracks the bridged versions as separate coin ids rather
+    # than adding them to "shiba-inu"'s own platforms field, so the live
+    # CoinGecko layer alone would undercount it. The manual fallback covers
+    # this without needing a live CoinGecko call at all.
+    repo = BridgeRepository(cache=DummyCache())
+
+    bridges = await repo.find_bridges_for_ticker("shib")
+
+    assert bridges is not None
+    assert all(set(b.networks) == {"Ethereum", "BNB Chain", "Polygon"} for b in bridges)
+
+
 async def test_manual_network_fallback_is_overridden_by_live_index_when_present():
     class IndexCache(DummyCache):
         async def get_token_index(self):
