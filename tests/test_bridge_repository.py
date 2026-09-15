@@ -122,6 +122,54 @@ async def test_native_non_evm_chain_tickers_are_curated_with_their_own_network()
         assert all(not b.auto_detected for b in bridges)
 
 
+async def test_thin_curated_entry_is_supplemented_with_extra_auto_detected_networks():
+    class IndexCache(DummyCache):
+        async def get_token_index(self):
+            # TON's curated entry only covers TON/Ethereum/BNB Chain; the
+            # live index also found a wrapped version on Gnosis.
+            return {"TON": ["BNB Chain", "Ethereum", "Gnosis"]}
+
+    repo = BridgeRepository(cache=IndexCache())
+
+    bridges = await repo.find_bridges_for_ticker("TON")
+
+    assert bridges is not None
+    curated = [b for b in bridges if not b.auto_detected]
+    auto = [b for b in bridges if b.auto_detected]
+    assert len(curated) == 1
+    assert curated[0].key == "tonbridge"
+    assert "TON" in curated[0].networks
+    assert len(auto) == 4  # supplemented with the general aggregators
+    assert all("Gnosis" in b.networks for b in auto)
+
+
+async def test_thin_curated_entry_is_not_supplemented_when_no_new_networks():
+    class IndexCache(DummyCache):
+        async def get_token_index(self):
+            # Same networks the curated TON bridge already reports.
+            return {"TON": ["BNB Chain", "Ethereum"]}
+
+    repo = BridgeRepository(cache=IndexCache())
+
+    bridges = await repo.find_bridges_for_ticker("TON")
+
+    assert bridges is not None
+    assert all(not b.auto_detected for b in bridges)
+
+
+async def test_well_covered_curated_ticker_is_not_supplemented():
+    class IndexCache(DummyCache):
+        async def get_token_index(self):
+            return {"USDT": ["Ethereum", "SomeBrandNewChain"]}
+
+    repo = BridgeRepository(cache=IndexCache())
+
+    bridges = await repo.find_bridges_for_ticker("USDT")
+
+    assert bridges is not None
+    assert all(not b.auto_detected for b in bridges)
+
+
 async def test_suggest_tickers_includes_live_index_tickers():
     class IndexCache(DummyCache):
         async def get_token_index(self):

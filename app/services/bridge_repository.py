@@ -11,6 +11,14 @@ from .cache import CacheClient
 _SEED_PATH = Path(__file__).resolve().parent.parent / "data" / "bridges_seed.json"
 _MIN_NETWORKS_FOR_AUTO_MATCH = 2
 
+# Curated entries with few bridges (typically native non-EVM chains like
+# TON/BTC/DOT that only have one official/trustless bridge) are topped up
+# with the auto-detected aggregator layer when it surfaces networks the
+# curated entry doesn't already cover — e.g. a wrapped version of the token
+# tradeable on extra EVM chains. Well-covered tickers (USDT, ETH, ...) are
+# left alone so the reply doesn't balloon with redundant network lists.
+_SUPPLEMENT_CURATED_BELOW = 3
+
 # General-purpose cross-chain swap+bridge aggregators. Unlike the curated
 # liquidity bridges above (which only route a pre-whitelisted set of
 # tokens), these route arbitrary ERC-20/SPL tokens by combining DEX
@@ -51,6 +59,12 @@ class BridgeRepository:
        ``BridgeInfo.auto_detected`` and the bot tells the user to double
        check the exact route before transferring.
 
+    A curated entry with few bridges (typically a native non-EVM chain like
+    TON/BTC/DOT that only has one official bridge) is topped up with any
+    auto-detected networks not already covered — e.g. a wrapped version of
+    the token tradeable on extra EVM chains — instead of the curated match
+    hiding that information. Well-covered curated tickers are left as-is.
+
     Either layer degrades gracefully to "not found" if its data is missing —
     curated data always ships with the app, and the auto-detected layer is
     simply absent until the first successful background sync.
@@ -88,10 +102,22 @@ class BridgeRepository:
         ticker = ticker.upper()
 
         curated = await self._find_curated(ticker)
-        if curated is not None:
+        if curated is None:
+            return await self._find_auto_detected(ticker)
+
+        if len(curated) >= _SUPPLEMENT_CURATED_BELOW:
             return curated
 
-        return await self._find_auto_detected(ticker)
+        auto_detected = await self._find_auto_detected(ticker)
+        if not auto_detected:
+            return curated
+
+        curated_networks = {network for bridge in curated for network in bridge.networks}
+        extra_networks = set(auto_detected[0].networks) - curated_networks
+        if not extra_networks:
+            return curated
+
+        return curated + auto_detected
 
     async def _find_curated(self, ticker: str) -> list[BridgeInfo] | None:
         bridge_keys = self._tokens.get(ticker)
