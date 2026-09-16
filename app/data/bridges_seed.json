@@ -229,6 +229,26 @@
       "display_name": "Berachain Bridge (official)",
       "url": "https://bridge.berachain.com/bridge/token",
       "networks": ["Ethereum", "Berachain"]
+    },
+    "unichain_native": {
+      "display_name": "Unichain Bridge (official)",
+      "url": "https://www.unichain.org/bridge",
+      "networks": ["Ethereum", "Unichain"]
+    },
+    "fraxtal_native": {
+      "display_name": "Fraxtal Bridge (official)",
+      "url": "https://app.frax.finance/bridge",
+      "networks": ["Ethereum", "Fraxtal"]
+    },
+    "movement_native": {
+      "display_name": "Movement Bridge (official, LayerZero)",
+      "url": "https://bridge.movementnetwork.xyz",
+      "networks": ["Ethereum", "Movement"]
+    },
+    "harmony_native": {
+      "display_name": "Harmony Bridge (official, LayerZero)",
+      "url": "https://bridge.harmony.one",
+      "networks": ["Ethereum", "Harmony"]
     }
   },
   "tokens": {
@@ -297,6 +317,11 @@
     "CORE": { "bridges": ["core_native"] },
     "BERA": { "bridges": ["berachain_native"] },
     "OSMO": { "bridges": ["axelar"] },
-    "AURORA": { "bridges": ["rainbowbridge"] }
+    "AURORA": { "bridges": ["rainbowbridge"] },
+    "UNI": { "bridges": ["unichain_native"] },
+    "FXS": { "bridges": ["fraxtal_native"] },
+    "FRAX": { "bridges": ["fraxtal_native"] },
+    "MOVE": { "bridges": ["movement_native"] },
+    "ONE": { "bridges": ["harmony_native"] }
   }
 }
