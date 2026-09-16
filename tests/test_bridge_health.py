@@ -202,6 +202,59 @@ async def test_default_check_url_reports_unreachable_after_both_attempts_fail(mo
     assert status == "unreachable"
 
 
+async def test_default_check_url_retries_a_5xx_response_too(monkeypatch):
+    # A 500/502/525/etc. is a real HTTP response, not a dropped connection,
+    # but it's just as often a momentary blip (a deploy in progress, an
+    # upstream timeout) as a genuine outage - this is what "Boba Network Hub
+    # (http_500)" and "Canto Bridge (http_525)" alerts turned out to be
+    # right after those bridges were added.
+    monkeypatch.setattr(bridge_health.asyncio, "sleep", _no_op_sleep)
+    attempts = {"count": 0}
+
+    async def flaky_get_status(url: str, timeout_seconds: float) -> str:
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            return "http_500"
+        return "ok"
+
+    monkeypatch.setattr(bridge_health, "_get_status", flaky_get_status)
+
+    status = await _default_check_url("https://example.com", 10)
+
+    assert status == "ok"
+    assert attempts["count"] == 2
+
+
+async def test_default_check_url_reports_persistent_5xx_after_retry(monkeypatch):
+    monkeypatch.setattr(bridge_health.asyncio, "sleep", _no_op_sleep)
+
+    async def always_500(url: str, timeout_seconds: float) -> str:
+        return "http_500"
+
+    monkeypatch.setattr(bridge_health, "_get_status", always_500)
+
+    status = await _default_check_url("https://example.com", 10)
+
+    assert status == "http_500"
+
+
+async def test_default_check_url_does_not_retry_a_plain_4xx(monkeypatch):
+    # A 404 is a deterministic response, not a blip - retrying it would just
+    # waste time and delay every check by the retry pause for no benefit.
+    attempts = {"count": 0}
+
+    async def always_404(url: str, timeout_seconds: float) -> str:
+        attempts["count"] += 1
+        return "http_404"
+
+    monkeypatch.setattr(bridge_health, "_get_status", always_404)
+
+    status = await _default_check_url("https://example.com", 10)
+
+    assert status == "http_404"
+    assert attempts["count"] == 1
+
+
 async def test_no_notifier_does_not_crash():
     cache = RecordingCache(initial=None)
     checker = BridgeHealthChecker(

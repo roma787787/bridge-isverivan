@@ -48,22 +48,31 @@ async def _get_status(url: str, timeout_seconds: float) -> str:
     return f"http_{response.status_code}"
 
 
+async def _attempt_status(url: str, timeout_seconds: float) -> str:
+    try:
+        return await _get_status(url, timeout_seconds)
+    except Exception as exc:
+        logger.warning("Health check attempt failed for %s: %s", url, exc)
+        return "unreachable"
+
+
+def _should_retry(status: str) -> bool:
+    return status == "unreachable" or status.startswith("http_5")
+
+
 async def _default_check_url(url: str, timeout_seconds: float) -> str:
-    # A single connection blip (DNS hiccup, dropped TLS handshake, momentary
-    # timeout) is common on cloud infra and looks identical to a real outage
-    # here - both raise an exception. One retry after a short pause tells
-    # them apart without weakening detection of a genuinely dead bridge,
-    # which will still fail on the retry too.
-    for attempt in range(2):
-        try:
-            return await _get_status(url, timeout_seconds)
-        except Exception as exc:
-            if attempt == 0:
-                await asyncio.sleep(_RETRY_DELAY_SECONDS)
-                continue
-            logger.warning("Health check failed for %s: %s", url, exc)
-            return "unreachable"
-    return "unreachable"  # unreachable
+    # A dropped connection and a 5xx response can both mean a genuine outage
+    # or just a momentary blip (a deploy in progress, an upstream timeout, a
+    # CDN that couldn't complete the TLS handshake with its own origin) -
+    # both looked identical to a real Boba Network/Canto outage in practice
+    # (500 and 525 respectively) right after those bridges were added. One
+    # retry after a short pause tells a blip apart from a bridge that's
+    # actually down, which will still fail the same way on the retry.
+    status = await _attempt_status(url, timeout_seconds)
+    if _should_retry(status):
+        await asyncio.sleep(_RETRY_DELAY_SECONDS)
+        status = await _attempt_status(url, timeout_seconds)
+    return status
 
 
 def _is_broken(status: str) -> bool:
