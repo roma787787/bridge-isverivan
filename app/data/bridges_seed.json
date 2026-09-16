@@ -185,6 +185,16 @@
       "url": "https://xbridge.neo.org",
       "networks": ["Neo N3", "Neo X"]
     },
+    "klever_native": {
+      "display_name": "Klever Bridge (official)",
+      "url": "https://bridge.klever.org",
+      "networks": ["Ethereum", "Tron", "Klever"]
+    },
+    "gala_native": {
+      "display_name": "GalaConnect (official)",
+      "url": "https://connect.gala.com",
+      "networks": ["Ethereum", "Solana", "TON", "GalaChain"]
+    },
     "bnb_native": {
       "display_name": "BNB Chain Bridge (official)",
       "url": "https://www.bnbchain.org/en/bridge",
@@ -433,6 +443,8 @@
     "EGLD": { "bridges": ["multiversx_native"] },
     "IOTX": { "bridges": ["iotex_native"] },
     "VET": { "bridges": ["vechain_native"] },
-    "NEO": { "bridges": ["neox_native"] }
+    "NEO": { "bridges": ["neox_native"] },
+    "KLV": { "bridges": ["klever_native"] },
+    "GALA": { "bridges": ["gala_native"] }
   }
 }
