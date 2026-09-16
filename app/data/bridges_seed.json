@@ -140,6 +140,26 @@
       "url": "https://portal.kaia.io/trade/bridge",
       "networks": ["Ethereum", "Kaia"]
     },
+    "milkomeda_native": {
+      "display_name": "Milkomeda Bridge (official)",
+      "url": "https://cardano-bridge.milkomeda.com",
+      "networks": ["Cardano", "Milkomeda C1"]
+    },
+    "etherlink_native": {
+      "display_name": "Etherlink Bridge (official)",
+      "url": "https://bridge.etherlink.com",
+      "networks": ["Tezos", "Etherlink"]
+    },
+    "oasis_native": {
+      "display_name": "Oasis ROSE App (official)",
+      "url": "https://rose.oasis.io/move",
+      "networks": ["Ethereum", "Oasis Sapphire"]
+    },
+    "flow_native": {
+      "display_name": "Flow Bridge (official)",
+      "url": "https://bridge.flow.com",
+      "networks": ["Ethereum", "Flow"]
+    },
     "bnb_native": {
       "display_name": "BNB Chain Bridge (official)",
       "url": "https://www.bnbchain.org/en/bridge",
@@ -379,6 +399,10 @@
     "LINEA": { "bridges": ["linea_native"] },
     "GNO": { "bridges": ["gnosis_native"] },
     "S": { "bridges": ["sonic_native"] },
-    "KAIA": { "bridges": ["kaia_native"] }
+    "KAIA": { "bridges": ["kaia_native"] },
+    "ADA": { "bridges": ["milkomeda_native"] },
+    "XTZ": { "bridges": ["etherlink_native"] },
+    "ROSE": { "bridges": ["oasis_native"] },
+    "FLOW": { "bridges": ["flow_native"] }
   }
 }
