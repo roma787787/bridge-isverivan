@@ -73,7 +73,7 @@
     "rainbowbridge": {
       "display_name": "Rainbow Bridge",
       "url": "https://rainbowbridge.app",
-      "networks": ["NEAR", "Ethereum"]
+      "networks": ["NEAR", "Ethereum", "Aurora"]
     },
     "starkgate": {
       "display_name": "StarkGate (official)",
@@ -295,6 +295,8 @@
     "CELO": { "bridges": ["celo_native"] },
     "TAIKO": { "bridges": ["taiko_native"] },
     "CORE": { "bridges": ["core_native"] },
-    "BERA": { "bridges": ["berachain_native"] }
+    "BERA": { "bridges": ["berachain_native"] },
+    "OSMO": { "bridges": ["axelar"] },
+    "AURORA": { "bridges": ["rainbowbridge"] }
   }
 }
