@@ -49,6 +49,38 @@ def test_format_bridges_message_flags_auto_detected():
     assert "Доступные мосты" in text
 
 
+def test_format_bridges_message_mentions_layerzero_note_for_auto_detected():
+    bridges = [
+        BridgeInfo(
+            key="lifi",
+            display_name="LI.FI (Jumper)",
+            url="https://jumper.exchange",
+            networks=["Ethereum", "Arbitrum"],
+            auto_detected=True,
+        )
+    ]
+
+    text = format_bridges_message("WLFI", bridges)
+
+    assert "LayerZero" in text
+    assert "layerzeroscan.com" in text
+
+
+def test_format_bridges_message_no_layerzero_note_for_curated_results():
+    bridges = [
+        BridgeInfo(
+            key="stargate",
+            display_name="Stargate Finance",
+            url="https://stargate.finance",
+            networks=["Ethereum", "Arbitrum"],
+        )
+    ]
+
+    text = format_bridges_message("USDT", bridges)
+
+    assert "LayerZero" not in text
+
+
 def test_format_bridges_message_no_disclaimer_for_curated_results():
     bridges = [
         BridgeInfo(
