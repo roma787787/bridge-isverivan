@@ -1,4 +1,5 @@
-from app.services.bridge_health import BridgeHealthChecker
+import app.services.bridge_health as bridge_health
+from app.services.bridge_health import BridgeHealthChecker, _default_check_url
 
 _BRIDGES = {
     "a": {"display_name": "Bridge A", "url": "https://a.example"},
@@ -30,6 +31,10 @@ def _check_url_returning(statuses: dict[str, str]):
         return statuses[url]
 
     return check
+
+
+async def _no_op_sleep(seconds: float) -> None:
+    pass
 
 
 async def test_first_run_alerts_for_already_broken_bridges():
@@ -160,6 +165,41 @@ async def test_blocked_status_on_first_run_does_not_alert():
     await checker.check_once()
 
     assert notifier.messages == []
+
+
+async def test_default_check_url_recovers_from_a_single_transient_failure(monkeypatch):
+    # A dropped connection or DNS hiccup on the first attempt looks identical
+    # to a real outage; retrying once tells a genuine outage (fails both
+    # times) apart from a momentary blip (fails once, then succeeds) - this
+    # is what a Blast Bridge "unreachable" alert turned out to be in practice.
+    monkeypatch.setattr(bridge_health.asyncio, "sleep", _no_op_sleep)
+    attempts = {"count": 0}
+
+    async def flaky_get_status(url: str, timeout_seconds: float) -> str:
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise ConnectionError("connection reset")
+        return "ok"
+
+    monkeypatch.setattr(bridge_health, "_get_status", flaky_get_status)
+
+    status = await _default_check_url("https://example.com", 10)
+
+    assert status == "ok"
+    assert attempts["count"] == 2
+
+
+async def test_default_check_url_reports_unreachable_after_both_attempts_fail(monkeypatch):
+    monkeypatch.setattr(bridge_health.asyncio, "sleep", _no_op_sleep)
+
+    async def always_failing_get_status(url: str, timeout_seconds: float) -> str:
+        raise ConnectionError("connection reset")
+
+    monkeypatch.setattr(bridge_health, "_get_status", always_failing_get_status)
+
+    status = await _default_check_url("https://example.com", 10)
+
+    assert status == "unreachable"
 
 
 async def test_no_notifier_does_not_crash():

@@ -35,18 +35,35 @@ _BLOCKED_STATUS_CODES = {401, 403, 429}
 CheckUrlFn = Callable[[str], Awaitable[str]]
 
 
+_RETRY_DELAY_SECONDS = 3
+
+
+async def _get_status(url: str, timeout_seconds: float) -> str:
+    async with httpx.AsyncClient(timeout=timeout_seconds, follow_redirects=True) as client:
+        response = await client.get(url, headers=_HEADERS)
+    if response.status_code < 400:
+        return "ok"
+    if response.status_code in _BLOCKED_STATUS_CODES:
+        return f"blocked_{response.status_code}"
+    return f"http_{response.status_code}"
+
+
 async def _default_check_url(url: str, timeout_seconds: float) -> str:
-    try:
-        async with httpx.AsyncClient(timeout=timeout_seconds, follow_redirects=True) as client:
-            response = await client.get(url, headers=_HEADERS)
-        if response.status_code < 400:
-            return "ok"
-        if response.status_code in _BLOCKED_STATUS_CODES:
-            return f"blocked_{response.status_code}"
-        return f"http_{response.status_code}"
-    except Exception as exc:
-        logger.warning("Health check failed for %s: %s", url, exc)
-        return "unreachable"
+    # A single connection blip (DNS hiccup, dropped TLS handshake, momentary
+    # timeout) is common on cloud infra and looks identical to a real outage
+    # here - both raise an exception. One retry after a short pause tells
+    # them apart without weakening detection of a genuinely dead bridge,
+    # which will still fail on the retry too.
+    for attempt in range(2):
+        try:
+            return await _get_status(url, timeout_seconds)
+        except Exception as exc:
+            if attempt == 0:
+                await asyncio.sleep(_RETRY_DELAY_SECONDS)
+                continue
+            logger.warning("Health check failed for %s: %s", url, exc)
+            return "unreachable"
+    return "unreachable"  # unreachable
 
 
 def _is_broken(status: str) -> bool:
