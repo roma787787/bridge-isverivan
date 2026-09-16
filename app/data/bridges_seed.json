@@ -249,6 +249,16 @@
       "display_name": "Harmony Bridge (official, LayerZero)",
       "url": "https://bridge.harmony.one",
       "networks": ["Ethereum", "Harmony"]
+    },
+    "plume_native": {
+      "display_name": "Plume Bridge (official)",
+      "url": "https://portal.plume.org/bridge",
+      "networks": ["Ethereum", "Plume"]
+    },
+    "merlin_native": {
+      "display_name": "Merlin Bridge (official)",
+      "url": "https://merlinchain.io/bridge",
+      "networks": ["Bitcoin", "Merlin Chain"]
     }
   },
   "tokens": {
@@ -322,6 +332,8 @@
     "FXS": { "bridges": ["fraxtal_native"] },
     "FRAX": { "bridges": ["fraxtal_native"] },
     "MOVE": { "bridges": ["movement_native"] },
-    "ONE": { "bridges": ["harmony_native"] }
+    "ONE": { "bridges": ["harmony_native"] },
+    "PLUME": { "bridges": ["plume_native"] },
+    "MERL": { "bridges": ["merlin_native"] }
   }
 }
