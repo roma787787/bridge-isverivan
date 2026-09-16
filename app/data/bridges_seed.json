@@ -214,6 +214,21 @@
       "display_name": "Celo Bridge (official, OP Stack)",
       "url": "https://mondo.celo.org/bridge",
       "networks": ["Ethereum", "Celo"]
+    },
+    "taiko_native": {
+      "display_name": "Taiko Bridge (official)",
+      "url": "https://bridge.taiko.xyz",
+      "networks": ["Ethereum", "Taiko"]
+    },
+    "core_native": {
+      "display_name": "Core Bridge (official, LayerZero)",
+      "url": "https://bridge.coredao.org",
+      "networks": ["Ethereum", "Core", "BNB Chain"]
+    },
+    "berachain_native": {
+      "display_name": "Berachain Bridge (official)",
+      "url": "https://bridge.berachain.com/bridge/token",
+      "networks": ["Ethereum", "Berachain"]
     }
   },
   "tokens": {
@@ -277,6 +292,9 @@
     "MANTA": { "bridges": ["manta_native"] },
     "CRO": { "bridges": ["cronos_native"] },
     "METIS": { "bridges": ["metis_native"] },
-    "CELO": { "bridges": ["celo_native"] }
+    "CELO": { "bridges": ["celo_native"] },
+    "TAIKO": { "bridges": ["taiko_native"] },
+    "CORE": { "bridges": ["core_native"] },
+    "BERA": { "bridges": ["berachain_native"] }
   }
 }
