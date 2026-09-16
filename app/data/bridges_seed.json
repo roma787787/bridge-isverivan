@@ -139,6 +139,26 @@
       "display_name": "Blast Bridge (official)",
       "url": "https://blast.io/bridge",
       "networks": ["Ethereum", "Blast"]
+    },
+    "mantle_native": {
+      "display_name": "Mantle Bridge (official)",
+      "url": "https://bridge.mantle.xyz",
+      "networks": ["Ethereum", "Mantle"]
+    },
+    "mode_native": {
+      "display_name": "Mode Bridge (official)",
+      "url": "https://bridge.mode.network",
+      "networks": ["Ethereum", "Mode"]
+    },
+    "opbnb_native": {
+      "display_name": "opBNB Bridge (official)",
+      "url": "https://opbnb-bridge.bnbchain.org",
+      "networks": ["BNB Chain", "opBNB"]
+    },
+    "zora_native": {
+      "display_name": "Zora Bridge (official)",
+      "url": "https://bridge.zora.energy",
+      "networks": ["Ethereum", "Zora"]
     }
   },
   "tokens": {
@@ -146,27 +166,30 @@
       "bridges": [
         "stargate", "orbiter", "cbridge", "synapse", "wormhole", "allbridge", "squid", "meson",
         "arbitrum_native", "optimism_native", "base_native", "polygon_native", "zksync_native",
-        "linea_native", "avalanche_native", "scroll_native", "gnosis_native", "bnb_native", "blast_native"
+        "linea_native", "avalanche_native", "scroll_native", "gnosis_native", "bnb_native", "blast_native",
+        "mantle_native", "mode_native", "zora_native"
       ]
     },
     "USDC": {
       "bridges": [
         "stargate", "hop", "across", "cbridge", "synapse", "wormhole", "allbridge", "squid",
         "arbitrum_native", "optimism_native", "base_native", "polygon_native", "zksync_native",
-        "linea_native", "avalanche_native", "scroll_native", "gnosis_native", "bnb_native", "blast_native"
+        "linea_native", "avalanche_native", "scroll_native", "gnosis_native", "bnb_native", "blast_native",
+        "mantle_native", "mode_native", "zora_native"
       ]
     },
     "ETH": {
       "bridges": [
         "hop", "across", "synapse", "orbiter", "cbridge", "stargate", "squid", "meson",
         "arbitrum_native", "optimism_native", "base_native", "polygon_native", "zksync_native",
-        "linea_native", "avalanche_native", "scroll_native", "gnosis_native", "bnb_native", "blast_native"
+        "linea_native", "avalanche_native", "scroll_native", "gnosis_native", "bnb_native", "blast_native",
+        "mantle_native", "mode_native", "zora_native"
       ]
     },
     "WBTC": { "bridges": ["across", "synapse", "cbridge", "wormhole", "allbridge"] },
     "SOL": { "bridges": ["wormhole", "allbridge"] },
     "MATIC": { "bridges": ["cbridge", "synapse", "squid", "meson", "polygon_native"] },
-    "BNB": { "bridges": ["cbridge", "wormhole", "allbridge", "squid", "bnb_native"] },
+    "BNB": { "bridges": ["cbridge", "wormhole", "allbridge", "squid", "bnb_native", "opbnb_native"] },
     "AVAX": { "bridges": ["wormhole", "cbridge", "synapse", "allbridge", "squid", "avalanche_native"] },
     "DAI": {
       "bridges": [
