@@ -122,13 +122,23 @@
     },
     "scroll_native": {
       "display_name": "Scroll Bridge (official)",
-      "url": "https://scroll.io/bridge",
+      "url": "https://portal.scroll.io/bridge",
       "networks": ["Ethereum", "Scroll"]
     },
     "gnosis_native": {
       "display_name": "Gnosis Bridge (official)",
       "url": "https://bridge.gnosischain.com",
       "networks": ["Ethereum", "Gnosis"]
+    },
+    "sonic_native": {
+      "display_name": "Sonic Gateway (official)",
+      "url": "https://gateway.soniclabs.com",
+      "networks": ["Ethereum", "Sonic"]
+    },
+    "kaia_native": {
+      "display_name": "Kaia Bridge (official)",
+      "url": "https://portal.kaia.io/trade/bridge",
+      "networks": ["Ethereum", "Kaia"]
     },
     "bnb_native": {
       "display_name": "BNB Chain Bridge (official)",
@@ -364,6 +374,11 @@
     "BTR": { "bridges": ["bitlayer_native"] },
     "BOB": { "bridges": ["bob_native"] },
     "PENGU": { "bridges": ["abstract_native"] },
-    "MON": { "bridges": ["monad_native"] }
+    "MON": { "bridges": ["monad_native"] },
+    "SCR": { "bridges": ["scroll_native"] },
+    "LINEA": { "bridges": ["linea_native"] },
+    "GNO": { "bridges": ["gnosis_native"] },
+    "S": { "bridges": ["sonic_native"] },
+    "KAIA": { "bridges": ["kaia_native"] }
   }
 }
