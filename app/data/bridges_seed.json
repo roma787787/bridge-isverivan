@@ -279,6 +279,11 @@
       "display_name": "Abstract Bridge (official)",
       "url": "https://bridge.abs.xyz",
       "networks": ["Ethereum", "Abstract"]
+    },
+    "monad_native": {
+      "display_name": "Monad Native Bridge (Wormhole NTT)",
+      "url": "https://monadbridge.com",
+      "networks": ["Ethereum", "Monad"]
     }
   },
   "tokens": {
@@ -358,6 +363,7 @@
     "HYPE": { "bridges": ["hyperliquid_native"] },
     "BTR": { "bridges": ["bitlayer_native"] },
     "BOB": { "bridges": ["bob_native"] },
-    "PENGU": { "bridges": ["abstract_native"] }
+    "PENGU": { "bridges": ["abstract_native"] },
+    "MON": { "bridges": ["monad_native"] }
   }
 }
