@@ -14,6 +14,7 @@ from .bot.handlers import start as start_handlers
 from .bot.handlers import stats as stats_handlers
 from .config import Settings
 from .db.repository import Storage
+from .services.bridge_health import BridgeHealthChecker
 from .services.bridge_repository import BridgeRepository
 from .services.cache import CacheClient
 from .services.coingecko_client import CoinGeckoClient
@@ -44,12 +45,22 @@ async def main() -> None:
         coingecko_timeout_seconds=settings.coingecko_timeout_seconds,
     )
 
+    bot = Bot(token=settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+    async def notify_admins(text: str) -> None:
+        for admin_id in settings.admin_ids:
+            try:
+                await bot.send_message(admin_id, text)
+            except Exception as exc:
+                logger.warning("Failed to notify admin %s: %s", admin_id, exc)
+
     defillama_client = DefiLlamaClient(settings.defillama_base_url, settings.request_timeout_seconds)
     sync_service = BridgeSyncService(
         client=defillama_client,
         cache=cache,
         seed_bridge_keys=bridge_repository.bridge_keys(),
         interval_hours=settings.sync_interval_hours,
+        notify=notify_admins,
     )
 
     lifi_client = LiFiClient(settings.lifi_base_url, settings.lifi_sync_timeout_seconds)
@@ -57,9 +68,17 @@ async def main() -> None:
         client=lifi_client,
         cache=cache,
         interval_hours=settings.sync_interval_hours,
+        notify=notify_admins,
     )
 
-    bot = Bot(token=settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    bridge_health_checker = BridgeHealthChecker(
+        bridges=bridge_repository.all_checkable_urls(),
+        cache=cache,
+        notify=notify_admins,
+        interval_hours=settings.bridge_health_check_interval_hours,
+        timeout_seconds=settings.bridge_health_check_timeout_seconds,
+    )
+
     dp = Dispatcher()
     dp.include_router(start_handlers.router)
     dp.include_router(stats_handlers.router)
@@ -68,6 +87,7 @@ async def main() -> None:
 
     sync_task = asyncio.create_task(sync_service.run_forever())
     token_index_sync_task = asyncio.create_task(token_index_sync_service.run_forever())
+    bridge_health_task = asyncio.create_task(bridge_health_checker.run_forever())
 
     try:
         await dp.start_polling(
@@ -80,6 +100,7 @@ async def main() -> None:
     finally:
         sync_task.cancel()
         token_index_sync_task.cancel()
+        bridge_health_task.cancel()
         await cache.close()
         await storage.close()
 

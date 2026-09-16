@@ -12,8 +12,10 @@ def format_bridges_message(ticker: str, bridges: list[BridgeInfo]) -> str:
         networks = ", ".join(escape(network) for network in bridge.networks)
         lines.append(f"{index}. <b>{escape(bridge.display_name)}</b>")
         lines.append(f"• Поддерживаемые сети: {networks}")
-        lines.append(f"• Ссылка: {escape(bridge.url)}")
         lines.append("")
+
+    lines.append("Открыть сайт моста можно кнопками ниже \U0001f447")
+    lines.append("")
 
     if is_auto_detected:
         lines.append(

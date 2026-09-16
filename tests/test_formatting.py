@@ -16,8 +16,10 @@ def test_format_bridges_message_contains_expected_fields():
 
     assert "USDT" in text
     assert "Stargate Finance" in text
-    assert "https://stargate.finance" in text
     assert "Ethereum, Arbitrum" in text
+    # URL is no longer inlined in the text — it's an inline keyboard button
+    # (see build_bridges_keyboard), so the message stays clean.
+    assert "https://stargate.finance" not in text
 
 
 def test_format_bridges_message_escapes_html():

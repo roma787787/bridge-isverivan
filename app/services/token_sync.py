@@ -5,6 +5,7 @@ import logging
 from datetime import datetime, timezone
 
 from .cache import CacheClient
+from .failure_alerts import FailureAlert, NotifyFn
 from .lifi_client import LiFiClient
 
 logger = logging.getLogger(__name__)
@@ -47,10 +48,17 @@ class TokenIndexSyncService:
     regardless.
     """
 
-    def __init__(self, client: LiFiClient, cache: CacheClient, interval_hours: float) -> None:
+    def __init__(
+        self,
+        client: LiFiClient,
+        cache: CacheClient,
+        interval_hours: float,
+        notify: NotifyFn | None = None,
+    ) -> None:
         self._client = client
         self._cache = cache
         self._interval_seconds = interval_hours * 3600
+        self._failure_alert = FailureAlert("Li.Fi sync (индекс токенов)", notify)
 
     async def sync_once(self) -> None:
         try:
@@ -58,10 +66,12 @@ class TokenIndexSyncService:
             chain_ids = self._mainnet_chain_ids(chains)
             if not chain_ids:
                 logger.warning("Token index sync: no chains resolved from Li.Fi, skipping")
+                await self._failure_alert.record_failure("no chains resolved from Li.Fi")
                 return
             tokens_by_chain = await self._client.fetch_tokens_by_chain(chain_ids)
         except Exception as exc:
             logger.warning("Token index sync failed, keeping previous data: %s", exc)
+            await self._failure_alert.record_failure(str(exc))
             return
 
         name_by_id = {
@@ -96,6 +106,7 @@ class TokenIndexSyncService:
 
         if filtered:
             await self._cache.set_token_index(filtered)
+            await self._failure_alert.record_success()
             logger.info(
                 "Token index sync complete: %d tickers indexed across %d/%d chains with data",
                 len(filtered),
@@ -104,6 +115,7 @@ class TokenIndexSyncService:
             )
         else:
             logger.warning("Token index sync produced no eligible tickers, keeping previous data")
+            await self._failure_alert.record_failure("Li.Fi returned no eligible priced tokens")
 
     def _index_key(self, token: dict) -> str | None:
         """Grouping key for a token, chosen to avoid symbol-squatting collisions.

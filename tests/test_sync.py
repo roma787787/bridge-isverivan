@@ -43,3 +43,33 @@ async def test_sync_once_survives_client_failure():
     await service.sync_once()
 
     assert cache.stored == {}
+
+
+async def test_sync_once_notifies_after_repeated_failures_and_on_recovery():
+    class FailingClient:
+        async def fetch_bridges(self):
+            raise RuntimeError("network down")
+
+    messages: list[str] = []
+
+    async def notify(text: str) -> None:
+        messages.append(text)
+
+    cache = RecordingCache()
+    service = BridgeSyncService(
+        client=FailingClient(), cache=cache, seed_bridge_keys={"stargate"}, interval_hours=8, notify=notify
+    )
+
+    await service.sync_once()
+    await service.sync_once()
+    assert messages == []  # below the default threshold of 3
+
+    await service.sync_once()
+    assert len(messages) == 1
+
+    working_client = FakeClient([{"name": "Stargate", "chains": ["Ethereum"]}])
+    service._client = working_client
+    await service.sync_once()
+
+    assert len(messages) == 2
+    assert "снова работает" in messages[1]

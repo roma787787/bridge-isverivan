@@ -129,6 +129,18 @@ class BridgeRepository:
         """Raw curated lookup, bypassing the auto-detected layer — used by /debug."""
         return self._tokens.get(ticker.upper())
 
+    def all_checkable_urls(self) -> dict[str, dict[str, str]]:
+        """Every bridge/aggregator URL worth periodically health-checking.
+
+        Covers both the curated bridges (from bridges_seed.json) and the
+        fixed general-purpose aggregators shown for auto-detected tickers
+        (which live only in code, not the JSON file).
+        """
+        result = {key: {"display_name": b["display_name"], "url": b["url"]} for key, b in self._bridges.items()}
+        for aggregator in _GENERAL_AGGREGATORS:
+            result[aggregator["key"]] = {"display_name": aggregator["display_name"], "url": aggregator["url"]}
+        return result
+
     def all_known_tickers(self) -> list[str]:
         return list(self._tokens.keys())
 

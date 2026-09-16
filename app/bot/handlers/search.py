@@ -8,6 +8,7 @@ from aiogram.types import Message
 from ...db.repository import Storage
 from ...services.bridge_repository import BridgeRepository
 from ..formatting import format_bridges_message, format_invalid_input_message, format_not_found_message
+from ..keyboards import build_bridges_keyboard
 
 router = Router(name="search")
 
@@ -35,7 +36,11 @@ async def handle_ticker(message: Message, bridge_repository: BridgeRepository, s
 
     if bridges:
         await storage.log_query(message.from_user.id, ticker, matched=True)
-        await message.answer(format_bridges_message(ticker, bridges), disable_web_page_preview=True)
+        await message.answer(
+            format_bridges_message(ticker, bridges),
+            reply_markup=build_bridges_keyboard(bridges),
+            disable_web_page_preview=True,
+        )
         return
 
     await storage.log_query(message.from_user.id, ticker, matched=False)

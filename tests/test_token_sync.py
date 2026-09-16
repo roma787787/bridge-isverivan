@@ -164,3 +164,28 @@ async def test_sync_once_survives_client_failure():
     await service.sync_once()
 
     assert cache.stored_index is None
+
+
+async def test_sync_once_notifies_after_repeated_failures():
+    class FailingClient:
+        async def fetch_chains(self):
+            raise RuntimeError("Li.Fi is down")
+
+        async def fetch_tokens_by_chain(self, chain_ids):
+            return {}
+
+    messages: list[str] = []
+
+    async def notify(text: str) -> None:
+        messages.append(text)
+
+    cache = RecordingCache()
+    service = TokenIndexSyncService(client=FailingClient(), cache=cache, interval_hours=8, notify=notify)
+
+    await service.sync_once()
+    await service.sync_once()
+    assert messages == []
+
+    await service.sync_once()
+    assert len(messages) == 1
+    assert "Li.Fi sync" in messages[0]

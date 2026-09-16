@@ -5,6 +5,7 @@ import logging
 
 from .cache import CacheClient
 from .defillama_client import DefiLlamaClient
+from .failure_alerts import FailureAlert, NotifyFn
 
 logger = logging.getLogger(__name__)
 
@@ -18,18 +19,23 @@ class BridgeSyncService:
         cache: CacheClient,
         seed_bridge_keys: set[str],
         interval_hours: float,
+        notify: NotifyFn | None = None,
     ) -> None:
         self._client = client
         self._cache = cache
         self._seed_keys = seed_bridge_keys
         self._interval_seconds = interval_hours * 3600
+        self._failure_alert = FailureAlert("DefiLlama sync (сети мостов)", notify)
 
     async def sync_once(self) -> None:
         try:
             bridges = await self._client.fetch_bridges()
         except Exception as exc:
             logger.warning("DefiLlama bridge sync failed, keeping previous data: %s", exc)
+            await self._failure_alert.record_failure(str(exc))
             return
+
+        await self._failure_alert.record_success()
 
         chains_by_name: dict[str, list[str]] = {}
         for bridge in bridges:
