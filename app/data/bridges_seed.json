@@ -189,6 +189,26 @@
       "display_name": "Manta Pacific Bridge (official)",
       "url": "https://pacific-bridge.manta.network",
       "networks": ["Ethereum", "Manta Pacific"]
+    },
+    "aptos_bridge_lz": {
+      "display_name": "Aptos Bridge (LayerZero)",
+      "url": "https://theaptosbridge.com",
+      "networks": ["Ethereum", "Arbitrum", "Optimism", "Avalanche", "Polygon", "BNB Chain", "Aptos"]
+    },
+    "sui_native": {
+      "display_name": "Sui Bridge (official)",
+      "url": "https://bridge.sui.io",
+      "networks": ["Ethereum", "Sui"]
+    },
+    "cronos_native": {
+      "display_name": "Cronos Bridge (official)",
+      "url": "https://cronos.org/bridge",
+      "networks": ["Ethereum", "Cronos"]
+    },
+    "metis_native": {
+      "display_name": "Metis Bridge (official)",
+      "url": "https://bridge.metis.io",
+      "networks": ["Ethereum", "Metis"]
     }
   },
   "tokens": {
@@ -234,8 +254,8 @@
     "ATOM": { "bridges": ["axelar"] },
     "DOT": { "bridges": ["snowbridge"] },
     "NEAR": { "bridges": ["rainbowbridge"] },
-    "APT": { "bridges": ["wormhole"] },
-    "SUI": { "bridges": ["wormhole"] },
+    "APT": { "bridges": ["wormhole", "aptos_bridge_lz"] },
+    "SUI": { "bridges": ["wormhole", "sui_native"] },
     "STRK": { "bridges": ["starkgate"] },
     "FIL": { "bridges": ["axelar"] },
     "JUP": { "bridges": ["wormhole"] },
@@ -249,6 +269,8 @@
     "MNT": { "bridges": ["mantle_native"] },
     "ZK": { "bridges": ["zksync_native"] },
     "RON": { "bridges": ["ronin_native"] },
-    "MANTA": { "bridges": ["manta_native"] }
+    "MANTA": { "bridges": ["manta_native"] },
+    "CRO": { "bridges": ["cronos_native"] },
+    "METIS": { "bridges": ["metis_native"] }
   }
 }
