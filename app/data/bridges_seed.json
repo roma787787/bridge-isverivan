@@ -160,6 +160,21 @@
       "url": "https://bridge.flow.com",
       "networks": ["Ethereum", "Flow"]
     },
+    "zilliqa_native": {
+      "display_name": "Zilliqa Bridge (official)",
+      "url": "https://xbridge.zilliqa.com",
+      "networks": ["Ethereum", "Zilliqa"]
+    },
+    "multiversx_native": {
+      "display_name": "MultiversX Bridge (official)",
+      "url": "https://bridge.multiversx.com",
+      "networks": ["Ethereum", "MultiversX"]
+    },
+    "iotex_native": {
+      "display_name": "IoTeX Bridge (official, ioTube)",
+      "url": "https://bridge.iotex.io",
+      "networks": ["Ethereum", "IoTeX", "BNB Chain"]
+    },
     "bnb_native": {
       "display_name": "BNB Chain Bridge (official)",
       "url": "https://www.bnbchain.org/en/bridge",
@@ -403,6 +418,9 @@
     "ADA": { "bridges": ["milkomeda_native"] },
     "XTZ": { "bridges": ["etherlink_native"] },
     "ROSE": { "bridges": ["oasis_native"] },
-    "FLOW": { "bridges": ["flow_native"] }
+    "FLOW": { "bridges": ["flow_native"] },
+    "ZIL": { "bridges": ["zilliqa_native"] },
+    "EGLD": { "bridges": ["multiversx_native"] },
+    "IOTX": { "bridges": ["iotex_native"] }
   }
 }
