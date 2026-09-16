@@ -147,7 +147,7 @@
     },
     "mode_native": {
       "display_name": "Mode Bridge (official)",
-      "url": "https://bridge.mode.network",
+      "url": "https://mode.superbridge.app",
       "networks": ["Ethereum", "Mode"]
     },
     "opbnb_native": {
