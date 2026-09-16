@@ -209,6 +209,11 @@
       "display_name": "Metis Bridge (official)",
       "url": "https://bridge.metis.io",
       "networks": ["Ethereum", "Metis"]
+    },
+    "celo_native": {
+      "display_name": "Celo Bridge (official, OP Stack)",
+      "url": "https://mondo.celo.org/bridge",
+      "networks": ["Ethereum", "Celo"]
     }
   },
   "tokens": {
@@ -271,6 +276,7 @@
     "RON": { "bridges": ["ronin_native"] },
     "MANTA": { "bridges": ["manta_native"] },
     "CRO": { "bridges": ["cronos_native"] },
-    "METIS": { "bridges": ["metis_native"] }
+    "METIS": { "bridges": ["metis_native"] },
+    "CELO": { "bridges": ["celo_native"] }
   }
 }
