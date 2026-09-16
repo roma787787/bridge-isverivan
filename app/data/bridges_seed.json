@@ -195,6 +195,21 @@
       "url": "https://connect.gala.com",
       "networks": ["Ethereum", "Solana", "TON", "GalaChain"]
     },
+    "boba_native": {
+      "display_name": "Boba Network Hub (official)",
+      "url": "https://hub.boba.network/bridge",
+      "networks": ["Ethereum", "Boba Network"]
+    },
+    "canto_native": {
+      "display_name": "Canto Bridge (official)",
+      "url": "https://app.canto.io/bridge",
+      "networks": ["Ethereum", "Cosmos", "Canto"]
+    },
+    "secret_native": {
+      "display_name": "Secret Network Bridge (official)",
+      "url": "https://dashboard.scrt.network/bridge",
+      "networks": ["Ethereum", "Secret Network"]
+    },
     "bnb_native": {
       "display_name": "BNB Chain Bridge (official)",
       "url": "https://www.bnbchain.org/en/bridge",
@@ -445,6 +460,9 @@
     "VET": { "bridges": ["vechain_native"] },
     "NEO": { "bridges": ["neox_native"] },
     "KLV": { "bridges": ["klever_native"] },
-    "GALA": { "bridges": ["gala_native"] }
+    "GALA": { "bridges": ["gala_native"] },
+    "BOBA": { "bridges": ["boba_native"] },
+    "CANTO": { "bridges": ["canto_native"] },
+    "SCRT": { "bridges": ["secret_native"] }
   }
 }
