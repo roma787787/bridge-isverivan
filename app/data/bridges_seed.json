@@ -164,6 +164,31 @@
       "display_name": "World Liberty Financial Bridge (official, Chainlink CCIP)",
       "url": "https://worldlibertyfinancial.com/bridge",
       "networks": ["Ethereum", "BNB Chain", "Solana"]
+    },
+    "injective_native": {
+      "display_name": "Injective Bridge (official, Peggy)",
+      "url": "https://bridge.injective.network",
+      "networks": ["Ethereum", "Injective", "Polygon", "Solana"]
+    },
+    "sei_native": {
+      "display_name": "Sei Bridge (official)",
+      "url": "https://app.sei.io/bridge",
+      "networks": ["Ethereum", "Sei"]
+    },
+    "worldchain_native": {
+      "display_name": "World Chain Bridge (official)",
+      "url": "https://wld.superbridge.app",
+      "networks": ["Ethereum", "World Chain", "Optimism"]
+    },
+    "ronin_native": {
+      "display_name": "Ronin Bridge (official, CCIP)",
+      "url": "https://app.roninchain.com/bridge",
+      "networks": ["Ethereum", "Ronin"]
+    },
+    "manta_native": {
+      "display_name": "Manta Pacific Bridge (official)",
+      "url": "https://pacific-bridge.manta.network",
+      "networks": ["Ethereum", "Manta Pacific"]
     }
   },
   "tokens": {
@@ -217,6 +242,13 @@
     "RAY": { "bridges": ["wormhole"] },
     "BONK": { "bridges": ["wormhole"] },
     "HBAR": { "bridges": ["hashport"] },
-    "WLFI": { "bridges": ["wlfi_bridge"] }
+    "WLFI": { "bridges": ["wlfi_bridge"] },
+    "INJ": { "bridges": ["injective_native"] },
+    "SEI": { "bridges": ["sei_native"] },
+    "WLD": { "bridges": ["worldchain_native", "optimism_native"] },
+    "MNT": { "bridges": ["mantle_native"] },
+    "ZK": { "bridges": ["zksync_native"] },
+    "RON": { "bridges": ["ronin_native"] },
+    "MANTA": { "bridges": ["manta_native"] }
   }
 }
