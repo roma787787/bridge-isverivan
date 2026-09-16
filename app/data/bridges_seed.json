@@ -159,6 +159,11 @@
       "display_name": "Zora Bridge (official)",
       "url": "https://bridge.zora.energy",
       "networks": ["Ethereum", "Zora"]
+    },
+    "wlfi_bridge": {
+      "display_name": "World Liberty Financial Bridge (official, Chainlink CCIP)",
+      "url": "https://worldlibertyfinancial.com/bridge",
+      "networks": ["Ethereum", "BNB Chain", "Solana"]
     }
   },
   "tokens": {
@@ -211,6 +216,7 @@
     "JUP": { "bridges": ["wormhole"] },
     "RAY": { "bridges": ["wormhole"] },
     "BONK": { "bridges": ["wormhole"] },
-    "HBAR": { "bridges": ["hashport"] }
+    "HBAR": { "bridges": ["hashport"] },
+    "WLFI": { "bridges": ["wlfi_bridge"] }
   }
 }
