@@ -124,6 +124,21 @@
       "display_name": "Scroll Bridge (official)",
       "url": "https://scroll.io/bridge",
       "networks": ["Ethereum", "Scroll"]
+    },
+    "gnosis_native": {
+      "display_name": "Gnosis Bridge (official)",
+      "url": "https://bridge.gnosischain.com",
+      "networks": ["Ethereum", "Gnosis"]
+    },
+    "bnb_native": {
+      "display_name": "BNB Chain Bridge (official)",
+      "url": "https://www.bnbchain.org/en/bridge",
+      "networks": ["Ethereum", "BNB Chain"]
+    },
+    "blast_native": {
+      "display_name": "Blast Bridge (official)",
+      "url": "https://blast.io/bridge",
+      "networks": ["Ethereum", "Blast"]
     }
   },
   "tokens": {
@@ -131,33 +146,33 @@
       "bridges": [
         "stargate", "orbiter", "cbridge", "synapse", "wormhole", "allbridge", "squid", "meson",
         "arbitrum_native", "optimism_native", "base_native", "polygon_native", "zksync_native",
-        "linea_native", "avalanche_native", "scroll_native"
+        "linea_native", "avalanche_native", "scroll_native", "gnosis_native", "bnb_native", "blast_native"
       ]
     },
     "USDC": {
       "bridges": [
         "stargate", "hop", "across", "cbridge", "synapse", "wormhole", "allbridge", "squid",
         "arbitrum_native", "optimism_native", "base_native", "polygon_native", "zksync_native",
-        "linea_native", "avalanche_native", "scroll_native"
+        "linea_native", "avalanche_native", "scroll_native", "gnosis_native", "bnb_native", "blast_native"
       ]
     },
     "ETH": {
       "bridges": [
         "hop", "across", "synapse", "orbiter", "cbridge", "stargate", "squid", "meson",
         "arbitrum_native", "optimism_native", "base_native", "polygon_native", "zksync_native",
-        "linea_native", "avalanche_native", "scroll_native"
+        "linea_native", "avalanche_native", "scroll_native", "gnosis_native", "bnb_native", "blast_native"
       ]
     },
     "WBTC": { "bridges": ["across", "synapse", "cbridge", "wormhole", "allbridge"] },
     "SOL": { "bridges": ["wormhole", "allbridge"] },
     "MATIC": { "bridges": ["cbridge", "synapse", "squid", "meson", "polygon_native"] },
-    "BNB": { "bridges": ["cbridge", "wormhole", "allbridge", "squid"] },
+    "BNB": { "bridges": ["cbridge", "wormhole", "allbridge", "squid", "bnb_native"] },
     "AVAX": { "bridges": ["wormhole", "cbridge", "synapse", "allbridge", "squid", "avalanche_native"] },
     "DAI": {
       "bridges": [
         "hop", "across", "synapse", "cbridge",
         "arbitrum_native", "optimism_native", "base_native", "polygon_native", "zksync_native",
-        "linea_native", "avalanche_native", "scroll_native"
+        "linea_native", "avalanche_native", "scroll_native", "gnosis_native"
       ]
     },
     "ARB": { "bridges": ["squid", "cbridge", "meson", "arbitrum_native"] },
