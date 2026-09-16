@@ -124,6 +124,44 @@ async def test_transition_to_broken_is_reported():
     assert "Bridge B" in notifier.messages[0]
 
 
+async def test_blocked_status_never_triggers_the_broken_alert():
+    # A bridge that's always well-known and heavily used (Arbitrum Bridge,
+    # Ronin Bridge in practice) returning 403/429 almost always means its WAF
+    # is blocking our monitor, not that the site is actually down.
+    cache = RecordingCache(initial={"a": "ok", "b": "ok"})
+    notifier = RecordingNotifier()
+    checker = BridgeHealthChecker(
+        bridges=_BRIDGES,
+        cache=cache,
+        notify=notifier,
+        interval_hours=24,
+        timeout_seconds=10,
+        check_url=_check_url_returning({"https://a.example": "ok", "https://b.example": "blocked_403"}),
+    )
+
+    await checker.check_once()
+
+    assert notifier.messages == []
+    assert cache.stored == {"a": "ok", "b": "blocked_403"}
+
+
+async def test_blocked_status_on_first_run_does_not_alert():
+    cache = RecordingCache(initial=None)
+    notifier = RecordingNotifier()
+    checker = BridgeHealthChecker(
+        bridges=_BRIDGES,
+        cache=cache,
+        notify=notifier,
+        interval_hours=24,
+        timeout_seconds=10,
+        check_url=_check_url_returning({"https://a.example": "blocked_429", "https://b.example": "ok"}),
+    )
+
+    await checker.check_once()
+
+    assert notifier.messages == []
+
+
 async def test_no_notifier_does_not_crash():
     cache = RecordingCache(initial=None)
     checker = BridgeHealthChecker(

@@ -12,7 +12,25 @@ from .failure_alerts import NotifyFn
 logger = logging.getLogger(__name__)
 
 _MAX_CONCURRENT_CHECKS = 10
-_USER_AGENT = "Mozilla/5.0 (compatible; BridgeFinderBot/1.0)"
+_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+}
+
+# Bridge frontends are frequently sat behind Cloudflare/Vercel-style bot
+# protection that returns one of these for *any* non-browser client,
+# monitoring services included — it says nothing about whether the site is
+# actually up for a real visitor. Treating these as "broken" produced
+# false-positive alerts in practice (Arbitrum Bridge and Ronin Bridge, two
+# of the most heavily used bridges in the space, both "403"; Berachain
+# Bridge "429" — a 429 by definition means the server is up and responding).
+# These are recorded and visible, but never drive the urgent "mosты сломаны"
+# alert on their own.
+_BLOCKED_STATUS_CODES = {401, 403, 429}
 
 CheckUrlFn = Callable[[str], Awaitable[str]]
 
@@ -20,13 +38,19 @@ CheckUrlFn = Callable[[str], Awaitable[str]]
 async def _default_check_url(url: str, timeout_seconds: float) -> str:
     try:
         async with httpx.AsyncClient(timeout=timeout_seconds, follow_redirects=True) as client:
-            response = await client.get(url, headers={"User-Agent": _USER_AGENT})
+            response = await client.get(url, headers=_HEADERS)
         if response.status_code < 400:
             return "ok"
+        if response.status_code in _BLOCKED_STATUS_CODES:
+            return f"blocked_{response.status_code}"
         return f"http_{response.status_code}"
     except Exception as exc:
         logger.warning("Health check failed for %s: %s", url, exc)
         return "unreachable"
+
+
+def _is_broken(status: str) -> bool:
+    return status != "ok" and not status.startswith("blocked_")
 
 
 class BridgeHealthChecker:
@@ -38,7 +62,9 @@ class BridgeHealthChecker:
     a dead link, this pings each curated URL on a schedule and notifies the
     admin only when a bridge's reachability *changes* — healthy -> broken or
     broken -> healthy — so a bridge that's been down for a week doesn't
-    re-alert every cycle.
+    re-alert every cycle. Statuses that just mean "this looks like a bot to
+    the site's WAF" (401/403/429) are tracked but never trigger the urgent
+    alert on their own — see ``_BLOCKED_STATUS_CODES``.
     """
 
     def __init__(
@@ -71,10 +97,14 @@ class BridgeHealthChecker:
         await self._cache.set_bridge_health(new_status)
 
         newly_broken = [
-            key for key, status in new_status.items() if status != "ok" and previous_status.get(key, "ok") == "ok"
+            key
+            for key, status in new_status.items()
+            if _is_broken(status) and not _is_broken(previous_status.get(key, "ok"))
         ]
         recovered = [
-            key for key, status in new_status.items() if status == "ok" and previous_status.get(key, "ok") != "ok"
+            key
+            for key, status in new_status.items()
+            if not _is_broken(status) and _is_broken(previous_status.get(key, "ok"))
         ]
 
         logger.info(
