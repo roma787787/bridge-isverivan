@@ -19,6 +19,16 @@ _HEADERS = {
     ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    # Some dApp frontends (Boba Network Hub's http_500 was confirmed a false
+    # positive - the same page loads fine in a real browser) run edge
+    # middleware that behaves differently for requests missing these
+    # standard browser fetch-metadata/hint headers, treating them as
+    # non-browser traffic even with a convincing User-Agent.
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Upgrade-Insecure-Requests": "1",
 }
 
 # Bridge frontends are frequently sat behind Cloudflare/Vercel-style bot
