@@ -259,6 +259,26 @@
       "display_name": "Merlin Bridge (official)",
       "url": "https://merlinchain.io/bridge",
       "networks": ["Bitcoin", "Merlin Chain"]
+    },
+    "hyperliquid_native": {
+      "display_name": "Hyperliquid Bridge (official)",
+      "url": "https://app.hyperliquid.xyz",
+      "networks": ["Arbitrum", "Hyperliquid"]
+    },
+    "bitlayer_native": {
+      "display_name": "Bitlayer Bridge (official)",
+      "url": "https://www.bitlayer.org",
+      "networks": ["Bitcoin", "Bitlayer"]
+    },
+    "bob_native": {
+      "display_name": "BOB Gateway (official)",
+      "url": "https://app.gobob.xyz/en/bridge",
+      "networks": ["Bitcoin", "Ethereum", "Arbitrum", "Base", "BOB"]
+    },
+    "abstract_native": {
+      "display_name": "Abstract Bridge (official)",
+      "url": "https://bridge.abs.xyz",
+      "networks": ["Ethereum", "Abstract"]
     }
   },
   "tokens": {
@@ -334,6 +354,10 @@
     "MOVE": { "bridges": ["movement_native"] },
     "ONE": { "bridges": ["harmony_native"] },
     "PLUME": { "bridges": ["plume_native"] },
-    "MERL": { "bridges": ["merlin_native"] }
+    "MERL": { "bridges": ["merlin_native"] },
+    "HYPE": { "bridges": ["hyperliquid_native"] },
+    "BTR": { "bridges": ["bitlayer_native"] },
+    "BOB": { "bridges": ["bob_native"] },
+    "PENGU": { "bridges": ["abstract_native"] }
   }
 }
