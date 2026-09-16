@@ -175,6 +175,16 @@
       "url": "https://bridge.iotex.io",
       "networks": ["Ethereum", "IoTeX", "BNB Chain"]
     },
+    "vechain_native": {
+      "display_name": "VeChain Bridge (official, via Wanchain)",
+      "url": "https://bridge.vet",
+      "networks": ["Ethereum", "VeChain"]
+    },
+    "neox_native": {
+      "display_name": "Neo X Bridge (official)",
+      "url": "https://xbridge.neo.org",
+      "networks": ["Neo N3", "Neo X"]
+    },
     "bnb_native": {
       "display_name": "BNB Chain Bridge (official)",
       "url": "https://www.bnbchain.org/en/bridge",
@@ -421,6 +431,8 @@
     "FLOW": { "bridges": ["flow_native"] },
     "ZIL": { "bridges": ["zilliqa_native"] },
     "EGLD": { "bridges": ["multiversx_native"] },
-    "IOTX": { "bridges": ["iotex_native"] }
+    "IOTX": { "bridges": ["iotex_native"] },
+    "VET": { "bridges": ["vechain_native"] },
+    "NEO": { "bridges": ["neox_native"] }
   }
 }
