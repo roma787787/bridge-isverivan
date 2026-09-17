@@ -122,9 +122,6 @@ class BridgeRepository:
         self._coingecko = coingecko
         self._coingecko_timeout = coingecko_timeout_seconds
 
-    def bridge_keys(self) -> set[str]:
-        return set(self._bridges.keys())
-
     def curated_bridge_keys_for(self, ticker: str) -> list[str] | None:
         """Raw curated lookup, bypassing the auto-detected layer — used by /debug."""
         return self._tokens.get(ticker.upper())
@@ -143,18 +140,6 @@ class BridgeRepository:
 
     def all_known_tickers(self) -> list[str]:
         return list(self._tokens.keys())
-
-    async def _networks_for(self, bridge_key: str) -> list[str]:
-        bridge = self._bridges[bridge_key]
-        live_chains = await self._cache.get_bridge_chains(bridge_key)
-        if not live_chains:
-            return list(bridge["networks"])
-
-        merged = list(bridge["networks"])
-        for chain in live_chains:
-            if chain not in merged:
-                merged.append(chain)
-        return merged
 
     async def find_bridges_for_ticker(self, ticker: str) -> list[BridgeInfo] | None:
         ticker = ticker.upper()
@@ -188,9 +173,10 @@ class BridgeRepository:
         result: list[BridgeInfo] = []
         for key in bridge_keys:
             bridge = self._bridges[key]
-            networks = await self._networks_for(key)
             result.append(
-                BridgeInfo(key=key, display_name=bridge["display_name"], url=bridge["url"], networks=networks)
+                BridgeInfo(
+                    key=key, display_name=bridge["display_name"], url=bridge["url"], networks=list(bridge["networks"])
+                )
             )
         return result
 

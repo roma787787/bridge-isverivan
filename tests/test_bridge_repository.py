@@ -4,9 +4,6 @@ from app.services.bridge_repository import BridgeRepository
 
 
 class DummyCache:
-    async def get_bridge_chains(self, bridge_key: str):
-        return None
-
     async def get_token_index(self):
         return None
 
@@ -68,20 +65,6 @@ async def test_suggestions_for_typo():
     suggestions = await repo.suggest_tickers("USDR")
 
     assert set(suggestions) & {"USDT", "USDC"}
-
-
-async def test_live_cache_data_is_merged_into_networks():
-    class LiveCache(DummyCache):
-        async def get_bridge_chains(self, bridge_key: str):
-            if bridge_key == "stargate":
-                return ["Ethereum", "Some New Chain"]
-            return None
-
-    repo = BridgeRepository(cache=LiveCache())
-    bridges = await repo.find_bridges_for_ticker("USDT")
-
-    stargate = next(b for b in bridges if b.key == "stargate")
-    assert "Some New Chain" in stargate.networks
 
 
 async def test_auto_detected_layer_returns_general_aggregators_for_uncurated_ticker():

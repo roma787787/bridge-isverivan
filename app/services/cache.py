@@ -25,13 +25,6 @@ class CacheClient:
         except Exception as exc:  # pragma: no cover - depends on optional dependency/env
             logger.warning("Redis client could not be initialized (%s); using in-memory cache only", exc)
 
-    async def get_bridge_chains(self, bridge_key: str) -> list[str] | None:
-        raw = await self._get(f"bridge:chains:{bridge_key}")
-        return json.loads(raw) if raw else None
-
-    async def set_bridge_chains(self, bridge_key: str, chains: list[str]) -> None:
-        await self._set(f"bridge:chains:{bridge_key}", json.dumps(chains))
-
     async def get_token_index(self) -> dict[str, list[str]] | None:
         raw = await self._get("token:index")
         return json.loads(raw) if raw else None
